@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import LayoutContent from "@/components/LayoutContent";
+import "@/styles/globals.css";
+import { cookies } from "next/headers";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,9 +16,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let isLogin = false;
+  let username = "";
+  const SECRET_KEY = process.env.SECRET_KEY || "";
+  const cookieStore = cookies();
+  const token = cookieStore.get("token")?.value || "";
+
+
+  if (token) {
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY) as { username: string };
+        isLogin = true;
+        username = decoded.username
+    } catch (error) {
+        console.error("Error verifying token:", error);
+        isLogin = false;
+        username = "";
+    }
+}
+
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className="">
+        <LayoutContent isLogin={isLogin} username={username}>{children}</LayoutContent>
+      </body>
     </html>
   );
 }
