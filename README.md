@@ -140,3 +140,8 @@ Server Action ?
 
 - [ ] tailwind css 全局变量、响应式布局
 - [ ] middleware
+- [ ] 添加导航：云平台
+```
+阿里云: /aliyun
+腾讯云：/tencent-clound
+```
