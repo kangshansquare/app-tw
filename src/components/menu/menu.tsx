@@ -1,72 +1,165 @@
-import MenuLink from "./memuLink/menuLink"
+"use client"
 
 import Link from "next/link"
 
-import { ArrowRight,Bookmark,Calendar,AddUser } from "@deemlol/next-icons";
+import { ToolOutlined, DatabaseOutlined, HighlightFilled, HomeFilled, CloudFilled, DownOutlined, AliyunOutlined, QqOutlined } from "@ant-design/icons";
+
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
 
 
 export default function Menu() {
-    const menuList = [
-        {
-            name: "Dashboard",
-            href: "/",
-            icon: <Bookmark size={16} />,
-            arrow: <ArrowRight size={22} />
-        },
-        {
-            name: "小工具",
-            href: "/tools",
-            icon: <Calendar size={16} />,
-            arrow: <ArrowRight size={22} />
-        },
-        {
-            name: "记录",
-            href: "/record",
-            icon: <AddUser size={16} />,
-            arrow: <ArrowRight size={22} />
-        },
-        {
-            name: "中间件管理",
-            href: "/middle",
-            icon: <AddUser size={16} />,
-            arrow: <ArrowRight size={22} />
-        }
-    ]
+
+    const MENU: Array<{
+        label: string;
+        href?: string;
+        icon: React.ReactNode;
+        children?: Array<{ label: string; href: string; icon?: React.ReactNode }>
+        
+    }> = [
+            { label: "Dashboard", href: "/", icon: <HomeFilled className="text-lg" /> },
+            { label: "工具", href: "/tools", icon: <ToolOutlined className="text-lg" /> },
+            { label: "记录", href: "/record", icon: <HighlightFilled className="text-lg" /> },
+            { label: "中间件管理", href: "/middle", icon: <DatabaseOutlined className="text-lg" /> },
+            { 
+                label: "云平台",
+                icon: <CloudFilled className="text-lg" />,
+                children: [
+                    { label: "阿里云", href: "/aliyun", icon: <AliyunOutlined /> },
+                    { label: "腾讯云", href: "/tencent-cloud", icon: <QqOutlined /> }
+                ]
+            }
+        ]
+
+    const baseLinkClass = "flex items-center gap-3 ml-1 mr-1 hover:cursor-pointer hover:text-gray-100 p-2 pl-4 rounded-md"
 
 
+    const pathname = usePathname()
+
+    const [ showSubMenu, setShowSubMenu ] = useState<boolean>(false)
+
+    const handleMenuClick = () => {
+        setShowSubMenu(!showSubMenu)
+    }
 
     return (
-        <div className="flex-[1] flex flex-col items-center justify-between  bg-gray-600">
-            <div className="flex flex-col gap-4 w-full text-white">
-                {/* <Link href="/" className="flex items-center gap-2 text-center p-4 hover:bg-gray-500 hover:cursor-pointer">
-                    <Bookmark size={16} /> 
-                    <span className="">Dashboard</span>
-                    <ArrowRight size={22} />
-                </Link>
+        <nav className="flex-[1] flex flex-col item-center justify-between bg-gray-600">
+            <div className="flex flex-col gap-4 w-full text-gray-300 mt-1">
+                {MENU.map((item, index) => {
+                    const isActive = item.href && pathname === item.href
+                    const hasChildren = item.children && item.children.length > 0;
 
-                <Link href="/tools" className="flex items-center gap-2 text-center p-4 hover:bg-gray-500 hover:cursor-pointer">
-                    <Calendar size={16} />
-                    <span className="">小工具</span>
-                    <ArrowRight size={22} />
-                </Link>
-                
-                <Link href="/record" className="flex items-center gap-2 text-center p-4 hover:bg-gray-500 hover:cursor-pointer">
-                    <AddUser size={16} />
-                    <span className="">记录</span>
-                    <ArrowRight size={22} />
-                </Link> */}
+                    if (hasChildren) {
+                        return (
+                            <div key={index} className="flex flex-col">
+                                <div 
+                                    className={`${baseLinkClass} justify-between`}
+                                    onClick={handleMenuClick}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        {item.icon}
+                                        <span className="text-center text-lg">{item.label}</span>
+                                    </div>
+                                    <div className="flex items-center"> 
+                                        <DownOutlined className={`text-xs transition-transform duration-200 ${showSubMenu ? "rotate-180": ""}`} />
+                                    </div>
+                                </div>
 
-                
+                                {showSubMenu && (
+                                    <div className="flex flex-col gap-3 mt-2">
+                                        {item.children?.map((subItem,index) => {
+                                            return (
+                                                <Link
+                                                    key={index}
+                                                    href={subItem.href}
+                                                    className={`flex items-center pl-10 ml-1 mr-1 gap-3 p-2 hover:cursor-pointer hover:text-gray-100 rounded-md ${pathname === subItem.href ? "bg-blue-500" : ""}`}
+                                                >
+                                                    {subItem.icon}
+                                                    <span>{subItem.label}</span>
+                                                </Link>
+                                            )
+                                        })}
+                                        
+                                    </div>
+                                )}
 
-                {
-                    menuList.map((item) => (
-                        <MenuLink key={item.name} name={item.name} href={item.href} icon={item.icon} arrow={item.arrow} />
-                    ))
-                }
+                            </div>
+                        )
+                    }
 
-
-
+                    return (
+                        <Link
+                            key={index}
+                            href={item.href || "#"}
+                            className={`${baseLinkClass} ${isActive ? "bg-blue-500" : ""}`}
+                        >
+                            {item.icon}
+                            <span className="text-lg">{item.label}</span>
+                        </Link>
+                    )
+                })}
             </div>
-        </div>
+        </nav>
     )
+
+
+
+
+    // return (
+    //     <div className="flex-[1] flex flex-col items-center justify-between  bg-gray-600">
+    //         <div className="flex flex-col gap-4 w-full text-gray-300 m-1">
+    //             <Link href="/" className={`flex items-center gap-3 ml-1 mr-1 hover:cursor-pointer hover:text-gray-100 p-2 pl-4 rounded-md ${pathname === "/" ? "bg-blue-500" : ""}`}>
+    //                 <HomeFilled className="text-lg" />
+    //                 <span className="text-lg">Dashboard</span>
+    //             </Link>
+
+    //             <Link href="/tools" className={`flex items-center gap-3 ml-1 mr-1 hover:cursor-pointer hover:text-gray-100 p-2 pl-4 rounded-md ${pathname === "/tools" ? "bg-blue-500" : ""}`}>
+    //                 <ToolOutlined className="text-lg" />
+    //                 <span className="text-lg">工具</span>
+    //             </Link>
+
+    //             <Link href="/record" className={`flex items-center gap-3 ml-1 mr-1 hover:cursor-pointer hover:text-gray-100 p-2 pl-4 rounded-md ${pathname === "/record" ? "bg-blue-500" : ""}`}>
+    //                 <HighlightFilled className="text-lg" />
+    //                 <span  className="text-lg">记录</span>
+    //             </Link>
+
+    //             <Link href="/middle" className={`flex items-center gap-3 ml-1 mr-1 hover:cursor-pointer hover:text-gray-100 p-2 pl-4 rounded-md ${pathname === "/middle" ? "bg-blue-500" : ""}`}>
+    //                 <DatabaseOutlined  className="text-lg" />
+    //                 <span className="text-lg">中间件管理</span>
+    //             </Link>
+                
+    //             <div className="flex flex-col">
+    //                 <div 
+    //                     className="flex items-center justify-between ml-1 mr-1 hover:cursor-pointer p-2 pl-4 rounded-md"
+    //                     onClick={handleMenuClick}
+    //                 >
+    //                     <div className="flex items-center gap-3">
+    //                         <CloudFilled className="text-lg" />
+    //                         <span className="text-center text-lg">云平台</span>
+    //                     </div>
+    //                     <div className="flex items-center">
+    //                         <DownOutlined className={`text-xs transition-transform duration-200 ${showSubMenu ? "rotate-180" : ""}`} />
+    //                     </div>
+    //                 </div>
+                    
+    //                 {showSubMenu && (
+    //                     <div className="flex flex-col gap-3">
+    //                         <Link href="/aliyun" className={`flex items-center mt-2 pl-10 ml-1 mr-1 gap-3 p-2 hover:cursor-pointer hover:text-gray-100 rounded-md ${pathname === '/aliyun' ? "bg-blue-500" : ""}`}>
+    //                             <AliyunOutlined />
+    //                             <span>阿里云</span>
+    //                         </Link>
+    //                         <Link href="/tencent-cloud" className={`flex items-center pl-10 ml-1 mr-1 gap-3 p-2 hover:cursor-pointer hover:text-gray-100 rounded-md ${pathname === '/tencent-cloud' ? "bg-blue-500" : ""}`}>
+    //                             <QqOutlined />
+    //                             <span>腾讯云</span>
+    //                         </Link>
+    //                     </div>
+    //                 )}
+
+    //             </div>
+    //         </div>
+    //     </div>
+    // )
+
+
 }
