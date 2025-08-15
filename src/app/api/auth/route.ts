@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
 
+
 interface AuthRequest extends NextRequest {};
 interface AuthResponse extends NextResponse {};
 
@@ -27,6 +28,7 @@ export async function POST(req: AuthRequest, res: AuthResponse) {
             where: {
                 name: body.username,       
             }
+            
         })
     
         console.log('登录请求体:', user);
@@ -40,8 +42,10 @@ export async function POST(req: AuthRequest, res: AuthResponse) {
             return NextResponse.json({ success: false, message: '密码错误' });
         }
 
+        // 获取用户id
+        const user_id = user?.id
 
-        const token = jwt.sign({ username: user.name }, SECRET_KEY, { expiresIn: '7d' });
+        const token = jwt.sign({ username: user.name, userId: user_id }, SECRET_KEY, { expiresIn: '7d' });
         const response = NextResponse.json({ success: true });
         response.cookies.set('token', token, {
             maxAge: 60 * 60 * 24 * 7, // 7天

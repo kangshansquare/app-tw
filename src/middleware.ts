@@ -5,6 +5,8 @@ export function middleware(request: NextRequest, response: NextResponse) {
     const token = request.headers.get('cookie')?.replace('token=', '');
     const { pathname } = request.nextUrl;
 
+    console.log("Token: ", token)
+
     console.log(pathname)
 
     if (pathname === '/login' || pathname === '/register') {
@@ -23,5 +25,5 @@ export function middleware(request: NextRequest, response: NextResponse) {
 }
 
 export const config = {
-    matcher: ['/', '/dashboard/:path*', '/tools/:path*', '/record/:path*', '/profile/:path*'],
+    matcher: ['/', '/dashboard/:path*', '/tools/:path*', '/record/:path*', '/profile/:path*', '/aliyun/:path*', '/tencent-cloud/:path*'],
 }

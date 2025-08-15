@@ -20,6 +20,7 @@ model User {
   passwordHash String
   isActive     Boolean @default(true)
   isAdmin      Boolean @default(false)
+  tips         Tips[]
 }
 
 model Tips {
@@ -28,4 +29,7 @@ model Tips {
   content    String
   ExpireDate DateTime
   status     String
+  priority   String   @default("medium")
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
 }

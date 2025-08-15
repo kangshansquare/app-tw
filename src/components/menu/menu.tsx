@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 
-import { ToolOutlined, DatabaseOutlined, HighlightFilled, HomeFilled, CloudFilled, DownOutlined, AliyunOutlined, QqOutlined } from "@ant-design/icons";
+import { ToolOutlined, DatabaseOutlined, HighlightFilled, HomeFilled, CloudFilled, DownOutlined, AliyunOutlined, QqOutlined, PushpinFilled } from "@ant-design/icons";
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -29,7 +29,8 @@ export default function Menu() {
                     { label: "阿里云", href: "/aliyun", icon: <AliyunOutlined /> },
                     { label: "腾讯云", href: "/tencent-cloud", icon: <QqOutlined /> }
                 ]
-            }
+            },
+            { label: "提醒事项", href: "/tips", icon: <PushpinFilled className="text-lg" /> }
         ]
 
     const baseLinkClass = "flex items-center gap-3 ml-1 mr-1 hover:cursor-pointer hover:text-gray-100 p-2 pl-4 rounded-md"

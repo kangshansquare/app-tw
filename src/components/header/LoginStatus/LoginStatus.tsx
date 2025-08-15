@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef } from "react";
-import { AddUser,Buy } from "@deemlol/next-icons";
+
+// import { InfoCircleFilled, SettingFilled } from "@ant-design/icons"
 
 
 
@@ -51,17 +52,19 @@ export default function LoginStatus({ isLogin,username }: { isLogin: boolean, us
                             
                             <div className="flex flex-col gap-2 w-full">
                                 <div className="flex gap-2 hover:cursor-pointer hover:bg-gray-300 p-2 items-center justify-center w-full">   
-                                    <Buy size={22} color="#000000"/>
+                                    {/* <Buy size={22} color="#000000"/> */}
+                                    {/* <InfoCircleFilled className="text-black text-lg" /> */}
                                     <Link href="/profile/info" className="text-black block w-full">个人信息</Link>
                                 </div>    
                                 <div className="flex gap-2 hover:cursor-pointer hover:bg-gray-300 p-2 items-center justify-center w-full">
-                                    <Buy size={22} color="#000000"/>
+                                    {/* <Buy size={22} color="#000000"/> */}
+                                    {/* <SettingFilled className="text-black text-lg"/> */}
                                     <Link href="/profile/user/settings" className="text-black  block w-full">偏好设置</Link>
                                 </div>
                             </div>
                             <div className="border border-gray-100 w-full"/>
                             <div className="flex gap-2 hover:cursor-pointer hover:bg-gray-300 p-2 items-center justify-center">
-                                <AddUser size={22} color="#000000"/>
+                                {/* <AddUser size={22} color="#000000"/> */}
                                 <button 
                                     className="text-black block w-full"
                                     onClick={handleLogout}

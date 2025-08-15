@@ -6,7 +6,7 @@ import Header from "@/components/header/header";
 
 
 
-export default function LayoutContent({ children, isLogin, username }: { children: React.ReactNode, isLogin: boolean, username: string }) {
+export default function LayoutContent({ children, isLogin, username, user_id }: { children: React.ReactNode, isLogin: boolean, username: string, user_id: number | null }) {
     const pathname = usePathname();
     const isLoginPage = pathname === "/login" || pathname === "/register";
    

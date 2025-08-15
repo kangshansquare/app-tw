@@ -145,3 +145,72 @@ Server Action ?
 阿里云: /aliyun
 腾讯云：/tencent-clound
 ```
+- [ ] 用户登陆后显示自己的任务
+```
+1.任务表与用户表，通过“外键关联”实现用户与任务绑定
+
+- Tips表（任务表）添加user_id字段（外键），关联用户表的“id”字段
+
+# @/prisma/schema.prisma
+model User {
+  id           Int     @id @default(autoincrement())
+  email        String  @unique
+  name         String  @unique
+  passwordHash String
+  isActive     Boolean @default(true)
+  isAdmin      Boolean @default(false)
+  tips         Tips[]
+}
+
+model Tips {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String
+  ExpireDate DateTime
+  status     String
+  priority   String   @default(medium)
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+}
+
+格式化model：npx prisma format
+运行数据库迁移来应用更改：npx prisma migrate dev --name add_user_id_to_tips
+
+
+2.用户登陆，后端验证成功后，生成Token，记录当前用户的“user_id”；
+
+- 登陆成功后，将用户id保存到token中
+
+/login -- 用户名和密码 -- /api/auth 验证 -- 登陆成功 -- 设置token（包含用户名和userId）
+
+# /api/auth/route.ts
+const user_id = user?.id
+const token = jwt.sign({ username: user.name, userId: user_id }, SECRET_KEY, { expiresIn: '7d' });
+
+# /api/user/get-id/route.ts
+export async function GET(req: NextRequest) {
+    ...
+    const token = req.headers.get("cookie")?.replace("token", "")
+
+    if (!token) return NextResponse.json({ success: false, message: "Unauthorized" });
+    
+    const decoded = jwt.verify(token, SECRET_KEY) as { username: string, userId: number };
+    const userId = decoded.userId;
+
+    return NextResponse.json({ success: true, userId });
+}
+
+# app/tips/page.tsx
+const getUerId = async () => {
+    const res = await fetch('/api/user/get-id', {
+        method: "GET",
+        credentials: 'include'        // 让浏览器自动携带cookie
+    })
+
+    const data = await res.json()
+
+    if (data?.success) return data.userId;
+}
+
+const user_id = getUserId();
+```

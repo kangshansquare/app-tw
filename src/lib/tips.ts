@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GetAll() {
@@ -14,7 +14,13 @@ export async function GetAll() {
     return response
 }
 
-export async function CreateTips() {}
+export async function CreateTips() {
+
+    const response = NextResponse.json({
+        success: true
+    })
+    return response;
+}
 
 export async function DeleteTips() {}
 

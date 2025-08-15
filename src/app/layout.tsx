@@ -18,27 +18,34 @@ export default function RootLayout({
 }>) {
   let isLogin = false;
   let username = "";
+  let user_id = null;
   const SECRET_KEY = process.env.SECRET_KEY || "";
   const cookieStore = cookies();
   const token = cookieStore.get("token")?.value || "";
 
 
   if (token) {
+    console.log("Layout Get Token: ", token)
     try {
-        const decoded = jwt.verify(token, SECRET_KEY) as { username: string };
+        const decoded = jwt.verify(token, SECRET_KEY) as { username: string, userId: number };
+        console.log(decoded)
         isLogin = true;
         username = decoded.username
+        user_id = decoded.userId
+
+        console.log(username,user_id)
     } catch (error) {
         console.error("Error verifying token:", error);
         isLogin = false;
         username = "";
+        user_id = null;
     }
 }
 
   return (
     <html lang="en">
       <body className="">
-        <LayoutContent isLogin={isLogin} username={username}>{children}</LayoutContent>
+        <LayoutContent isLogin={isLogin} username={username} user_id={user_id} >{children}</LayoutContent>
       </body>
     </html>
   );
