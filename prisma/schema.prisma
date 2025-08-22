@@ -24,12 +24,14 @@ model User {
 }
 
 model Tips {
-  id         Int      @id @default(autoincrement())
-  title      String
-  content    String
-  ExpireDate DateTime
-  status     String
-  priority   String   @default("medium")
-  user_id    Int
-  user       User     @relation(fields: [user_id], references: [id])
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  ExpireDate  DateTime
+  status      String
+  priority    String   @default("medium")
+  user_id     Int
+  create_time DateTime @default(now())
+  update_time DateTime @default(now()) @updatedAt
+  user        User     @relation(fields: [user_id], references: [id])
 }

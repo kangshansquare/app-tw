@@ -6,9 +6,11 @@ import { useState } from "react";
 interface CreateTipsProps {
     show: boolean
     onClose: () => void
+    user_id: number | null
+    onCreated: () => void
 }
 
-export default function CreateTips({ show, onClose }: CreateTipsProps) {
+export default function CreateTips({ show, onClose, user_id, onCreated }: CreateTipsProps) {
 
     const [ messages, setMessages ] = useState<string | null>(null)
 
@@ -18,15 +20,19 @@ export default function CreateTips({ show, onClose }: CreateTipsProps) {
 
     const handleCreateTipsForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        
+
         const formData = new FormData(e.currentTarget);
         const title = formData.get('title') as string;
         const content = formData.get('content') as string;
         const ExpireDate = formData.get('ExpireDate')
         const priority = formData.get('priority') as string
+        const status = formData.get('status') as string
 
         console.log(title, content, ExpireDate, priority);
 
-        if (!title || !content || !ExpireDate || !priority) {
+        if (!title || !content || !ExpireDate) {
             setMessages("请填写信息！")
             return;
         }
@@ -38,13 +44,15 @@ export default function CreateTips({ show, onClose }: CreateTipsProps) {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ title, content, ExpireDate, priority, status: "" })
+                body: JSON.stringify({ title, content, ExpireDate, priority, status, user_id })
             })
 
             const data = await res.json();
 
             if (data?.success) {
                 setMessages("创建成功！")
+                
+                if (onCreated) onCreated();    // 新增，通知父组件刷新
 
                 setTimeout(() => {
                     setMessages(null);
@@ -58,10 +66,6 @@ export default function CreateTips({ show, onClose }: CreateTipsProps) {
         } catch (eror) {
             setMessages("网络错误，请稍后再试！")
         }
-
-        
-        
-        
         
     }
     
@@ -100,21 +104,30 @@ export default function CreateTips({ show, onClose }: CreateTipsProps) {
                                     name="ExpireDate"
                                 />
                             </div>
-                            <div className="flex-col gap-2">
-                                <span className="text-sm">优先级</span>
-                                <div className="flex gap-3">
-                                    <label className="flex gap-2">
-                                        <input type="radio" name="priority" value="low" />
-                                        低
-                                    </label>
-                                    <label className="flex gap-2">
-                                        <input type="radio" name="priority" value="medium" defaultChecked />
-                                        中
-                                    </label>
-                                    <label className="flex gap-2">
-                                        <input type="radio" name="priority" value="high" />
-                                        高
-                                    </label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="flex-col gap-2">
+                                    <span className="text-sm">优先级</span>
+                                    <div className="flex gap-3 py-2">
+                                        <label className="flex gap-2">
+                                            <input type="radio" name="priority" value="low" />
+                                            低
+                                        </label>
+                                        <label className="flex gap-2">
+                                            <input type="radio" name="priority" value="medium" defaultChecked />
+                                            中
+                                        </label>
+                                        <label className="flex gap-2">
+                                            <input type="radio" name="priority" value="high" />
+                                            高
+                                        </label>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-sm">状态</label>
+                                    <select id="taskStaus" className="border border-gray-300 outline-none px-4 py-2 rounded-xl mb-4" name="status">
+                                        <option defaultChecked>未完成</option>
+                                        <option>已完成</option>
+                                    </select>
                                 </div>
                             </div>
                             <div className="flex justify-end gap-4">

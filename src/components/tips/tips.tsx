@@ -6,11 +6,13 @@ import CreateTips from "./CreateTips/CreateTips";
 import TipCards from "./TipsCards/Tips";
 import TipsItems from "./TipsItems/TipsItems";
 
+import type { TipsData } from "@/types/tips";
 
 
 export default  function Tips() {
 
-    const [ tips, setTips] = useState<Array<{ title: string, content: string, ExpireDate: Date, status: string, priority: string }>>([]);
+    const [ tips, setTips] = useState<Array<TipsData>>([]);
+    const [userId, setUserId] = useState<number | null>(null);
 
     const getUserId = async () => {
         const res = await fetch('/api/user/get-id', {
@@ -25,7 +27,60 @@ export default  function Tips() {
         }
     }
 
-    const user_id = getUserId();
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const user_id = await getUserId();
+            
+            if (typeof user_id === 'number') {
+                setUserId(user_id);
+            }
+        };
+
+        fetchUserId();
+    }, [])
+
+    // 点击button显示4种状态的tip：all（全部）、pending（待完成）、done(已完成)、expired（已逾期）
+    const [ currentButton, setCurrentButton ] = useState<'all' | 'pending' | 'done' | 'expired'>('all')
+    const filteredTips = tips.filter(tip => {
+        if (currentButton === 'all') return true;
+        if (currentButton === 'pending') return tip.status === '未完成';
+        if (currentButton === 'done') return tip.status === '已完成';
+        if (currentButton === 'expired') return tip.status === '已逾期';
+
+        return true;
+    })
+    
+
+    const handleTipsItemInputChange =  async (tip: TipsData) => {
+
+        if (!tip.id || userId === null) return;
+
+        const tipWithUserId = { ...tip, user_id: userId }
+
+        console.log("父组件接收的tips: ", tip)
+        // 更新tip
+        try {
+            const res = await fetch(`/api/tips/${tip.id}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(tipWithUserId)
+            });
+            const data = await res.json();
+            if (data?.success) {
+                fetchTips();
+            } else {
+                console.log("更新失败~")
+            }
+
+        } catch (error) {
+            console.log("更新异常", error)
+        }
+        
+        
+    }
 
         
     const [ showCreateTips, setShowCreateTips ] = useState<boolean>(false)
@@ -40,20 +95,25 @@ export default  function Tips() {
         console.log("Load more tips~")
     }
 
-    useEffect(() => {
-        console.log("Tips:", tips);
-        const fetchTips = async () => {
-            const res = await fetch('/api/tips?page=4', {
-                method: 'GET',
-                credentials: 'include'
-            })
-            const data = await res.json();
-            if (data?.success) {
-                setTips(data.tips);
-            }
+    const fetchTips = async () => {
+        if (userId === null) return;
+
+        const res = await fetch(`/api/tips?user_id=${userId}`, {
+            method: 'GET',
+            credentials: 'include',
+            
+        })
+        const data = await res.json();
+        
+        if (data?.success) {
+            setTips(data.tips);
         }
+    }
+
+
+    useEffect(() => {
         fetchTips();
-    }, [tips])
+    }, [userId])
 
     
 
@@ -72,18 +132,38 @@ export default  function Tips() {
                 </div>
             </div>
 
-            { showCreateTips && <CreateTips  show={showCreateTips} onClose={() => setShowCreateTips(false)} /> }
+            { showCreateTips && <CreateTips  show={showCreateTips} onClose={() => setShowCreateTips(false)} user_id={userId} onCreated={fetchTips}/> }
 
-            <TipCards />
+            <TipCards tips={tips} />
 
             <div className="flex justify-start gap-5">
-                <button className="outline-none p-2 pl-4 pr-4 bg-btn-primary text-white rounded-xl">全部</button>
-                <button className="outline-none p-2 pl-4 pr-4 bg-white hover:bg-yellow-100 transition-colors rounded-xl">待完成</button>
-                <button className="outline-none p-2 pl-4 pr-4 bg-white hover:bg-teal-100 transition-colors rounded-xl">已完成</button>
-                <button className="outline-none p-2 pl-4 pr-4 bg-white hover:bg-red-100 transition-colors rounded-xl">已逾期</button>
+                <button 
+                    className="outline-none p-2 pl-4 pr-4 bg-btn-primary text-white rounded-xl"
+                    onClick={() => setCurrentButton('all')}
+                >
+                    全部
+                </button>
+                <button 
+                    className="outline-none p-2 pl-4 pr-4 bg-yellow-500 text-white hover:bg-yellow-400 transition-colors rounded-xl"
+                    onClick={() => setCurrentButton('pending')}
+                >
+                    待完成
+                </button>
+                <button 
+                    className="outline-none p-2 pl-4 pr-4 bg-teal-500 text-white hover:bg-teal-400 transition-colors rounded-xl"
+                    onClick={() => setCurrentButton('done')}
+                >
+                    已完成
+                </button>
+                <button 
+                    className="outline-none p-2 pl-4 pr-4 bg-red-500 text-white hover:bg-red-400 transition-colors rounded-xl"
+                    onClick={() => setCurrentButton('expired')}
+                >
+                    已逾期
+                </button>
             </div>
 
-            <TipsItems tips={tips} />
+            <TipsItems tips={filteredTips}  user_id={userId} handleTipsItemInputChange={handleTipsItemInputChange} fetchTips={fetchTips} />
 
             <div className="flex items-center justify-center mt-5">
                 <button 

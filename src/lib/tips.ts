@@ -1,20 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { TipsFormData } from "@/types/tips";
 
-export async function GetAll() {
 
-    const tips = await prisma.tips.findMany()
+export async function GetAll(user_id: number | null) {
 
-    const response = NextResponse.json([
-        {id: 1, title: "禁用openvpn用户", content: '禁用openvpn用户username',ExpireDate:'2025-8-1', status: 'running'},
-        {id: 2, title: "禁用openvpn用户", content: '禁用openvpn用户username1',ExpireDate:'2025-6-30', status: 'completed'},
-        {id: 3, title: "删除openvpn规则", content: 'iptables -t nat -D POSTROUTING -o br0 -s 172.19.5.26 -d 192.168.23.203/32 -p tcp -m multiport --dports 9023,9223 -j SNAT --to-source 172.18.30.11',ExpireDate:'2025-7-1', status: 'completed'},
-    ])
+    if (user_id === null) return NextResponse.json({ success: false })
+
     
-    return response
+    function getStatus(tip: { ExpireDate: Date, status: string }) {
+        const now = new Date();
+        const expire = new Date(tip.ExpireDate)
+
+        if (tip.status === '已完成') return '已完成';
+        if (expire < now) return '已逾期';
+
+        return '未完成';
+    }
+
+    try {
+
+        const tips = await prisma.tips.findMany({
+            where: {
+                user_id: user_id
+            }
+        })
+
+        const tipsWithStatus = tips.map(tip => ({
+            ...tip,
+            status: getStatus(tip)
+        }))
+
+
+        return NextResponse.json({ success: true, tips: tipsWithStatus })
+
+    } catch (error) {
+        return NextResponse.json({ success: false })
+    }
+    
 }
 
-export async function CreateTips() {
+export async function CreateTips({ title, content, ExpireDate, priority, status, user_id }: TipsFormData) {
+
+    // console.log({ title, content, ExpireDate, priority, status, user_id })
+    
+    
+
+    try {
+        await prisma.tips.create({
+            data: { title, content, ExpireDate: new Date(ExpireDate), status, priority, user_id }
+        })
+    } catch (error) {
+        console.log("创建失败！", error)
+        return NextResponse.json({ success: false })
+    }
 
     const response = NextResponse.json({
         success: true
@@ -22,6 +61,34 @@ export async function CreateTips() {
     return response;
 }
 
-export async function DeleteTips() {}
+export async function DeleteTips(id: number, user_id: number) {
+    try {
+        await prisma.tips.delete({
+            where: { id, user_id }
+        })
 
-export async function UpdateTips() {}
+        return true
+    } catch (error) {
+        console.log("删除失败", error)
+        return NextResponse.json({ success: false })
+    }
+
+}
+
+export async function UpdateTips(id: number, user_id: number, data: Partial<TipsFormData>) {
+    console.log("API 接收到的更新数据: ", data)
+
+    // console.log(typeof data)
+    
+
+    try {
+        await prisma.tips.update({
+            where: { id, user_id },
+            data
+        });
+
+        return true
+    } catch (error) {
+        return false
+    }
+}

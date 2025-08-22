@@ -10,5 +10,7 @@ export async function GET(req: NextRequest) {
     const decoded = jwt.verify(token, SECRET_KEY) as { username: string, userId: number };
     const userId = decoded.userId;
 
+    console.log("API: get-id", userId)
+
     return NextResponse.json({ success: true, userId });
 }
