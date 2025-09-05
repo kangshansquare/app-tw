@@ -3,8 +3,7 @@ import ReactDOM  from "react-dom";
 import { useEffect, useState, useRef } from "react";
 import { CloseCircleFilled } from '@ant-design/icons';
 import type { TipsData } from "@/types/tips";
-import { useDebounce } from "@/hooks/useDebounce";
-
+import { type } from "node:os";
 
 
 
@@ -22,8 +21,20 @@ export default function UpdateTips({ show, onClose, user_id, tipEdit, onNotify, 
 
     const [ updateTip, setUpdateTip ] = useState<TipsData | null>(null)
     
-    
-    const deBounceValue = useDebounce(updateTip, 300)
+    function getChangedFields<T extends object>(original: T, updated: T): Partial<T> {
+        const changed: Partial<T> = {};
+
+        (Object.keys(updated) as Array<keyof T>).forEach(key => {
+            const originalValue = original[key]
+            const updatedValue = updated[key]
+
+            if (updatedValue !== originalValue) {
+                changed[key] = updatedValue;
+            }
+        })
+
+        return changed;
+    }
 
     function getDateTimeToString(date: Date) {
         const dateFormat = new Date(date)
@@ -44,64 +55,59 @@ export default function UpdateTips({ show, onClose, user_id, tipEdit, onNotify, 
     const handleChange = (e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name,value } = e.target;
 
+        console.log("更改的字段: ", name, "类型： ", typeof name)
+        console.log(value)
+
         setUpdateTip(prev => {
             if (!prev) return prev;
             return {
                 ...prev,
-                [name]: value
+                [name]: name === "ExpireDate" ? new Date(value) : value
             }
         })
             
-        
     }
 
     const handleUpdateTipsForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // if (!user_id === null || tipEdit?.id === null) return;
-
         const updateFromData = new FormData(e.currentTarget);
         const title = updateFromData.get('title') as string;
         const content = updateFromData.get('content') as string;
-        const ExpireDate = updateFromData.get("ExpireDate")
-        const priority = updateFromData.get("priority") as string;
-        const status = updateFromData.get('status') as string;
-
-
+          
 
         if (!title || !content) {
             onNotify("error", "请填写信息")
             return;
         }
 
+        if (tipEdit && updateTip) {
+            const updateData = getChangedFields(tipEdit, updateTip)
 
-        
+            try {
+                const res = await fetch(`/api/tips/${tip?.id}`, {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ updateData, user_id })
+                })
 
-        try {
-            const res = await fetch(`/api/tips/${tip?.id}`, {
-                method: "PUT",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ deBounceValue, user_id })
-            })
+                const data = await res.json();
+                if(data?.success) {
+                    onNotify("success", "更新任务成功")
+                    onClose();       
+                    fetchTips();   // 通知父组件刷新
 
-            const data = await res.json();
-            if(data?.success) {
-                onNotify("success", "更新任务成功")
-                onClose();       
-                fetchTips();   // 通知父组件刷新
+                }
 
+            } catch (error) {
+                onNotify("error", "更新任务失败")
             }
-
-        } catch (error) {
-            onNotify("error", "更新任务失败")
         }
 
 
-
-        // console.log("提交更新的数据:",  deBounceValue)
 
     }
     
@@ -196,11 +202,6 @@ export default function UpdateTips({ show, onClose, user_id, tipEdit, onNotify, 
                             </div>
                         </form>
                     </div>
-
-                    <div className="text-center min-h-10 mb-2">
-                        {/* { messages && <p>{messages}</p> } */}
-                    </div>
-                    
                 </div>
             </div>,
             document.body

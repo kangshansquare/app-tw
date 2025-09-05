@@ -35,3 +35,17 @@ model Tips {
   update_time DateTime @default(now()) @updatedAt
   user        User     @relation(fields: [user_id], references: [id])
 }
+
+model OpenVPN {
+  id             Int      @id @default(autoincrement())
+  name           String   @default("-")
+  sector         String   @default("-")
+  account_ip     String
+  apply_date     DateTime @default(now())
+  dest_ip        String
+  type           String
+  reason         String   @default("工作需要")
+  apply_duration String   @default("永久")
+  status         String
+  description    String   @default("-")
+}

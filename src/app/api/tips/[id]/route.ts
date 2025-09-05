@@ -4,16 +4,15 @@ import { DeleteTips, UpdateTips } from "@/lib/tips";
 export async function PUT(req: NextRequest, { params }: { params: {id: string, data: FormData} }) {
     const id = Number(params.id);
     const body = await req.json();
-    const { user_id, ...updateData } = body;
 
-    const { debounceValue } = updateData
+    const { user_id, updateData } = body;
 
-    console.log("Udate API: ", id, user_id, debounceValue)
+    console.log("Udate API: ", id, user_id, updateData)
 
-    // const result = await UpdateTips(id, user_id, updateData);
-    // if (result) {
-    //     return NextResponse.json({ success: true })
-    // }
+    const result = await UpdateTips(id, user_id, updateData);
+    if (result) {
+        return NextResponse.json({ success: true })
+    }
 
     return NextResponse.json({ success: false }, { status: 500 } )
 }

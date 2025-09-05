@@ -214,3 +214,7 @@ const getUerId = async () => {
 
 const user_id = getUserId();
 ```
+- [ ] 监控信息展示
+```
+通过脚本收集信息，api推送到server --- 入库 --- web展示（颗粒度 天/周/月）
+```

@@ -3,13 +3,13 @@ import ReactDOM from 'react-dom'
 import React, { useState } from "react";
 import { CloseCircleFilled, WarningFilled } from '@ant-design/icons'
 import type { TipsData } from '@/types/tips';
-import Notification from '../Notification/Notification';
+import Notification from '../../Notification/Notification';
 
 interface DeleteTipsProps {
     show: boolean;
     onClose: () => void;
     tipDelete: TipsData | null
-    onNotify: (type?: "success" | "error" | "info", message?: string)  => void
+    onNotify: (type: "success" | "error" | "info", message: string)  => void
     user_id: number | null
     fetchTips: () => void                 
 }

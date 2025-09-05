@@ -44,7 +44,6 @@ export async function CreateTips({ title, content, ExpireDate, priority, status,
 
     // console.log({ title, content, ExpireDate, priority, status, user_id })
     
-    
 
     try {
         await prisma.tips.create({
@@ -70,7 +69,8 @@ export async function DeleteTips(id: number, user_id: number) {
         return true
     } catch (error) {
         console.log("删除失败", error)
-        return NextResponse.json({ success: false })
+        // return NextResponse.json({ success: false })
+        return false
     }
 
 }
@@ -78,8 +78,6 @@ export async function DeleteTips(id: number, user_id: number) {
 export async function UpdateTips(id: number, user_id: number, data: Partial<TipsFormData>) {
     console.log("API 接收到的更新数据: ", data)
 
-    // console.log(typeof data)
-    
 
     try {
         await prisma.tips.update({
@@ -89,6 +87,7 @@ export async function UpdateTips(id: number, user_id: number, data: Partial<Tips
 
         return true
     } catch (error) {
+        console.log("错误: ", error)
         return false
     }
 }

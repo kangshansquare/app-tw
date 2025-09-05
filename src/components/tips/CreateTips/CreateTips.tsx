@@ -3,16 +3,20 @@ import ReactDOM  from "react-dom";
 import { CloseCircleFilled } from '@ant-design/icons';
 import { useState } from "react";
 
+
 interface CreateTipsProps {
     show: boolean
     onClose: () => void
     user_id: number | null
     onCreated: () => void
+    onNotify: ( type: "success" | "error" | "info", message: string ) => void
+    
 }
 
-export default function CreateTips({ show, onClose, user_id, onCreated }: CreateTipsProps) {
+export default function CreateTips({ show, onClose, user_id, onCreated, onNotify }: CreateTipsProps) {
 
     const [ messages, setMessages ] = useState<string | null>(null)
+
 
     const closeModel = (e: React.MouseEvent<HTMLDivElement> ) => {
         if (e.target === e.currentTarget) onClose();
@@ -50,21 +54,22 @@ export default function CreateTips({ show, onClose, user_id, onCreated }: Create
             const data = await res.json();
 
             if (data?.success) {
-                setMessages("创建成功！")
                 
                 if (onCreated) onCreated();    // 新增，通知父组件刷新
 
                 setTimeout(() => {
                     setMessages(null);
+                    onNotify("success", "创建成功")
                     onClose();
+                    
                 }, 500)
 
             } else {
-                setMessages("创建失败，请重试！")
+                onNotify("error", "创建失败，请重试！")
             }
 
         } catch (eror) {
-            setMessages("网络错误，请稍后再试！")
+            onNotify("error", "网络错误")
         }
         
     }
@@ -142,7 +147,7 @@ export default function CreateTips({ show, onClose, user_id, onCreated }: Create
                     </div>
 
                     <div className="text-center min-h-10 mb-2">
-                        { messages && <p>{messages}</p> }
+                        { messages && <p className="text-red-400">{messages}</p> }
                     </div>
                     
                 </div>

@@ -3,7 +3,6 @@ import { GetAll,CreateTips, DeleteTips, UpdateTips } from "@/lib/tips";
 
 
 
-
 export async function GET(request: NextRequest) {
     const url = request.url;   // http://localhost:3000/api/tips?page=1 
     
@@ -16,7 +15,6 @@ export async function GET(request: NextRequest) {
     
     return GetAll(Number(user_id));
     
-    
 }
 
 export async function POST(request: NextRequest) {
@@ -28,10 +26,10 @@ export async function POST(request: NextRequest) {
     return CreateTips(body);
 }
 
-export async function UPDATE(request: NextRequest) {
-    const body = await request.json();
+// export async function UPDATE(request: NextRequest) {
+//     const body = await request.json();
 
-    console.log("Update api: ", body)
+//     console.log("Update api: ", body)
 
-    // return UpdateTips();
-}
+//     // return UpdateTips();
+// }

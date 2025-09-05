@@ -6,10 +6,18 @@ import CreateTips from "./CreateTips/CreateTips";
 import TipCards from "./TipsCards/Tips";
 import TipsItems from "./TipsItems/TipsItems";
 
+import Notification from "@/components/Notification/Notification";
+
+
 import type { TipsData } from "@/types/tips";
 
 
 export default  function Tips() {
+
+    const [ notification, setNotification ] = useState<{ show: boolean, type?: "success" | "error" | "info", message?: string }>({ show: false })
+    const onNotify = (type: "success" | "error" | "info", message: string) => {
+        setNotification({show: true, type, message })
+    }
 
     const [ tips, setTips] = useState<Array<TipsData>>([]);
     const [userId, setUserId] = useState<number | null>(null);
@@ -66,7 +74,7 @@ export default  function Tips() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(tipWithUserId)
+                body: JSON.stringify({ updateData: tip, user_id: userId })
             });
             const data = await res.json();
             if (data?.success) {
@@ -132,7 +140,17 @@ export default  function Tips() {
                 </div>
             </div>
 
-            { showCreateTips && <CreateTips  show={showCreateTips} onClose={() => setShowCreateTips(false)} user_id={userId} onCreated={fetchTips}/> }
+            { 
+                showCreateTips && 
+                <CreateTips  
+                    show={showCreateTips} 
+                    onClose={() => setShowCreateTips(false)} 
+                    user_id={userId} 
+                    onCreated={fetchTips}
+                    onNotify={(type,message) => setNotification({show: true, type, message })}
+                    // onNotify={onNotify}
+                /> 
+            }
 
             <TipCards tips={tips} />
 
@@ -163,7 +181,13 @@ export default  function Tips() {
                 </button>
             </div>
 
-            <TipsItems tips={filteredTips}  user_id={userId} handleTipsItemInputChange={handleTipsItemInputChange} fetchTips={fetchTips} />
+            <TipsItems 
+                tips={filteredTips}  
+                user_id={userId} 
+                handleTipsItemInputChange={handleTipsItemInputChange} 
+                fetchTips={fetchTips}
+                setNotification={(type, message) => setNotification({ show: true, type, message })}
+            />
 
             <div className="flex items-center justify-center mt-5">
                 <button 
@@ -174,6 +198,18 @@ export default  function Tips() {
                     加载更多
                 </button>
             </div>
+
+            {/* 新增、更新、删除任务 提醒 */}
+            { 
+                notification &&
+                <Notification  
+                    show={notification.show}
+                    type={notification.type}
+                    message={notification.message}
+                    closeNotification={() => setNotification({...notification, show: false})}
+                />             
+            }
+
         </div>
     )
 }

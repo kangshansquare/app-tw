@@ -44,7 +44,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="">
+      <body className="bg-gray-50">
         <LayoutContent isLogin={isLogin} username={username} user_id={user_id} >{children}</LayoutContent>
       </body>
     </html>
