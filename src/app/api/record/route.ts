@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
 
     // 搜索
     const q = (searchParams.get("q") || "").trim();
-    
 
-    console.log("后端接收到的参数：", page, pageSize, q)
+    // 导出；默认导出所有数据，有搜索条件时，按条件导出；
+    const exportFlag = searchParams.get("export");
 
     const whereFilter = q ? {
         OR: [
@@ -36,6 +36,14 @@ export async function GET(request: NextRequest) {
     const thisMonth = getDateRange("month");
     const lastMonth = getDateRange("lastMonth")
     
+    if (exportFlag === 'all') {
+        const all = await prisma.openVPN.findMany({
+            where: whereFilter,
+            orderBy: { apply_date: 'desc' }
+        });
+
+        return NextResponse.json({ success: true, records: all })
+    }
 
     try {
         const [ totalCount, items, countthisWeek, countlastWeek, countthisMonth, countlastMonth, hasExpireItems ] = await Promise.all([

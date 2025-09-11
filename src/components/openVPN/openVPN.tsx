@@ -92,30 +92,6 @@ export default function OpenVPN() {
             setIsLoading(false)
         }
 
-
-
-        // try {
-        //     const res = await fetch(`/api/record?page=${currentPage}&pageSize=${pageSize}`, {
-        //         method: 'GET'
-        //     })
-
-        //     const data = await res.json();
-        //     if (data?.success) {
-        //         setRecordData(data.records);
-        //         // setTotalPage(data?.totalPage)
-        //         const { totalCount, totalPage, page } = data.pagination;
-        //         const { detailInfo } = data
-        //         setTotalPage(totalPage);
-        //         setTotalCount(totalCount);
-        //         setPage(page)
-        //         setDetailInfo(detailInfo)
-        //     }
-
-        // } catch (error) {
-        //     console.log("获取Record失败~")
-        // } finally {
-        //     setIsLoading(false)
-        // }
     }
 
     const [ userId, setUserId ] = useState<number | null>(null)
@@ -167,6 +143,40 @@ export default function OpenVPN() {
         fetchRecords(1, 6, "")
     }
 
+    // 导出数据到excel
+    const handleExportAll = async () => {
+        const params = new URLSearchParams({ export: 'all' })
+        if (query.trim()) params.set('q', query.trim());
+        
+        try {
+            const res = await fetch(`/api/record?${params.toString()}`, {
+                method: 'GET'
+            })
+            const data = await res.json();
+            if (!data.success) return onNotify('error', "导出失败")
+
+            const records = data.records || [];
+            const rows = records.map((r: any) => ({
+                申请人: r.name,
+                部门: r.sector,
+                账号: r.account_ip,
+                申请日期: new Date(r.apply_date).toISOString().split('T')[0],
+                目的IP端口: r.dest_ip,
+                申请类型: RuleType_LABEL[r.type as RuleType],
+                申请原因: r.type === 'close_account' ? '离职' : r.reason,
+                截止日期: r.apply_duration,
+                备注: r.description,
+            }));
+            const XLSX = await import('xlsx');
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, 'OpenVPN');
+            XLSX.writeFile(wb, `openv_records_${Date.now()}.xlsx`)
+            
+        } catch (error) {
+            console.log("导出失败")
+        }
+    }
 
     useEffect(() => {
         fetchRecords();
@@ -213,6 +223,15 @@ export default function OpenVPN() {
                         }
 
                     </div>
+
+                    <button
+                        type='button'
+                        className='outline-none border border-gray-300 px-3 py-2 rounded-md hover:bg-gray-50'
+                        onClick={handleExportAll}
+                    >
+                        导出全部
+                    </button>
+
                     <button 
                         className={`p-2 flex gap-2 bg-teal-500 rounded-md hover:bg-teal-400 hover:-translate-y-0.5 transition-all ${userId === 1 ? "" : "disabled:cursor-not-allowed"}`} 
                         onClick={() => setShowCreatePortal(true)}
