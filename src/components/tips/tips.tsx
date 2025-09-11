@@ -21,6 +21,7 @@ export default  function Tips() {
 
     const [ tips, setTips] = useState<Array<TipsData>>([]);
     const [userId, setUserId] = useState<number | null>(null);
+    const [ isLoading, setIsLoading ] = useState<boolean>(false)
 
     const getUserId = async () => {
         const res = await fetch('/api/user/get-id', {
@@ -106,15 +107,23 @@ export default  function Tips() {
     const fetchTips = async () => {
         if (userId === null) return;
 
-        const res = await fetch(`/api/tips?user_id=${userId}`, {
-            method: 'GET',
-            credentials: 'include',
+        setIsLoading(true)
+
+        try {
+            const res = await fetch(`/api/tips?user_id=${userId}`, {
+                method: 'GET',
+                credentials: 'include',
+                
+            })
+            const data = await res.json();
             
-        })
-        const data = await res.json();
-        
-        if (data?.success) {
-            setTips(data.tips);
+            if (data?.success) {
+                setTips(data.tips);
+            }
+        } catch(error) {
+            onNotify("error", "网络错误")
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -181,13 +190,24 @@ export default  function Tips() {
                 </button>
             </div>
 
-            <TipsItems 
-                tips={filteredTips}  
-                user_id={userId} 
-                handleTipsItemInputChange={handleTipsItemInputChange} 
-                fetchTips={fetchTips}
-                setNotification={(type, message) => setNotification({ show: true, type, message })}
-            />
+            {
+                isLoading ? (
+                    <div className='flex-1 flex items-center justify-center h-[400px]'>
+                        <div className='flex flex-col items-center gap-4'>
+                            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500'></div>
+                            <span className='text-gray-500'>加载中....</span>
+                        </div>
+                    </div>
+                ) : (
+                    <TipsItems 
+                        tips={filteredTips}  
+                        user_id={userId} 
+                        handleTipsItemInputChange={handleTipsItemInputChange} 
+                        fetchTips={fetchTips}
+                        setNotification={(type, message) => setNotification({ show: true, type, message })}
+                    />
+                )
+            }
 
             <div className="flex items-center justify-center mt-5">
                 <button 

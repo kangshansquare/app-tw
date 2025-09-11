@@ -20,6 +20,12 @@ const RuleType_LABEL: Record<RuleType, string> = {
     close_account: "注销账号"
 }
 
+type StatusType = "opened" | "deleted" | "closed"
+const StatusType_LABEL: Record<StatusType, string> = {
+    opened: "已开通",
+    deleted: "已删除",
+    closed: "已注销"
+}
 
 export default function DetailRecord({ show, onClose, record }: DetailRecordProps) {
 
@@ -49,12 +55,14 @@ export default function DetailRecord({ show, onClose, record }: DetailRecordProp
                                 <span>{record ? new Date(record.apply_date).toISOString().split('T')[0] : ""}</span>
                             </div>
                             <div className='flex flex-col gap-1'>
-                                <span className='font-light text-gray-600 text-sm'>申请时长</span>
+                                <span className='font-light text-gray-600 text-sm'>截止日期</span>
                                 <span>{record?.apply_duration}</span>
                             </div>
                             <div className='flex flex-col gap-1'>
                                 <span className='font-light text-gray-600 text-sm'>目的IP-端口</span>
-                                <span>{record?.dest_ip}</span>
+                                { record?.dest_ip.split(";").map((r, index) => (
+                                    <span key={r + index}>{r}</span>
+                                )) }
                             </div>
                             <div className='flex flex-col gap-1'>
                                 <span className='font-light text-gray-600 text-sm'>申请类型</span>
@@ -62,7 +70,7 @@ export default function DetailRecord({ show, onClose, record }: DetailRecordProp
                             </div>
                             <div className='flex flex-col gap-1'>
                                 <span className='font-light text-gray-600 text-sm'>状态</span>
-                                <span>{record?.status}</span>
+                                <span>{StatusType_LABEL[record?.status as StatusType]}</span>
                             </div>
                         </div>
                     </div>

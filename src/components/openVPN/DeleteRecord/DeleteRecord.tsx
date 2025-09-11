@@ -59,7 +59,7 @@ export default function DeleteRecord({ show, onClose, record, onNotify, fetchRec
     return (
         ReactDOM.createPortal(
             <div className='fixed inset-0 z-50 bg-black/50 flex flex-col items-center justify-center' onClick={onClose}>
-                <div className='bg-white rounded-lg w-full max-w-xl max-h-[50vh]' onClick={e => e.stopPropagation()}>
+                <div className='bg-white rounded-lg w-full max-w-xl' onClick={e => e.stopPropagation()}>
                     <div className='flex justify-between p-5'>
                         <h3 className='font-medium text-xl text-gray-600'>确认删除</h3>
                         <CloseOutlined className='text-sm text-gray-400 hover:text-gray-600'  onClick={onClose}/>
@@ -82,6 +82,8 @@ export default function DeleteRecord({ show, onClose, record, onNotify, fetchRec
                                 <span className='font-semibold text-sm text-gray-700'>部门: <strong className='text-xs text-gray-500'>{record?.sector}</strong></span>
                                 <span className='font-semibold text-sm text-gray-700'>申请类型: <strong className='text-xs text-gray-500'>{RuleType_LABEL[record?.type as RuleType]}</strong></span>
                                 <span className='font-semibold text-sm text-gray-700'>申请日期: <strong className='text-xs text-gray-500'>{record ? new Date(record.apply_date).toISOString().split('T')[0] : ""}</strong></span>
+                                <span className='font-semibold text-sm text-gray-700'>目的IP-端口: <strong className='text-xs text-gray-500'>{record?.dest_ip}</strong></span>
+                                <span className='font-semibold text-sm text-gray-700'>账号/IP: <strong className='text-xs text-gray-500'>{record?.account_ip}</strong></span>
                             </div>
                         </div>
                     </div>

@@ -1,9 +1,9 @@
 'use client';
 
-import { PlusSquareFilled, SearchOutlined, EyeFilled, EditFilled, DeleteFilled } from '@ant-design/icons';
+import { PlusSquareFilled, SearchOutlined, EyeFilled, EditFilled, DeleteFilled, CloseOutlined } from '@ant-design/icons';
 import ItemCards from './ItemCards/ItemCards';
 import Notification from '@/components/Notification/Notification';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CreateRecord from './CreateRecord/CreateRecord';
 import DetailRecord from './DetailRecord/DetailRecord';
 import EditRecord from './EditRecord/EditRecord';
@@ -13,73 +13,6 @@ import DeleteRecord from './DeleteRecord/DeleteRecord';
 import type { OpenVPNRecordType } from '@/types/record';
 import Pagination from '@/components/Pagination/Pagination';
 
-// const RecordData = [
-//     {
-//         id: 1,
-//         name: '张三',
-//         sector: "研发技术平台-互联网产品研发部-互联网_运维组",
-//         account_ip: 'san.zhang,172.19.6.2',
-//         apply_date: '2025-08-12',
-//         dest_ip: '172.18.55.40 9080;192.168.23.203 9021,9221',
-//         type: "开通规则",
-//         reason: '工作需要',
-//         apply_duration: '永久',
-//         status: '已开通',
-//         description: ''
-//     },
-//     {
-//         id: 2,
-//         name: '李四',
-//         sector: "研发技术平台-互联网产品研发部-互联网_运维组",
-//         account_ip: 'wangwu,172.89.7.102;zhaoliu,172.19.3.78',
-//         apply_date: '2025-08-12',
-//         dest_ip: '172.18.55.40 9080',
-//         type: "开通规则",
-//         reason: '工作需要',
-//         apply_duration: '永久',
-//         status: '已开通',
-//         description: ''
-//     },
-//     {
-//         id: 3,
-//         name: '赵六',
-//         sector: "研发技术平台-互联网产品研发部-互联网_运维组",
-//         account_ip: 'wangwu',
-//         apply_date: '2025-08-12',
-//         dest_ip: '-',
-//         type: "申请账号",
-//         reason: '工作需要',
-//         apply_duration: '永久',
-//         status: '已开通',
-//         description: ''
-//     },
-//     {
-//         id: 4,
-//         name: '孙七',
-//         sector: "研发技术平台-互联网产品研发部-互联网_运维组",
-//         account_ip: 'wangwu,172.89.7.102;zhaoliu,172.19.3.78',
-//         apply_date: '2025-08-12',
-//         dest_ip: '172.18.55.40 9080',
-//         type: "申请账号+开通规则",
-//         reason: '新入职',
-//         apply_duration: '永久',
-//         status: '已开通',
-//         description: ''
-//     },
-//     {
-//         id: 5,
-//         name: '-',
-//         sector: "-",
-//         account_ip: 'wangwu,172.89.7.102',
-//         apply_date: '2025-08-12',
-//         dest_ip: '-',
-//         type: "注销账号",
-//         reason: '离职',
-//         apply_duration: '永久',
-//         status: '已注销',
-//         description: ''
-//     }
-// ]
 
 
 type RuleType = "apply_account" | "open_rule" | "account_and_rule" | "delete_rule" | "close_account"
@@ -91,26 +24,98 @@ const RuleType_LABEL: Record<RuleType, string> = {
     close_account: "注销账号"
 }
 
+type StatusType = "opened" | "deleted" | "closed"
+const StatusType_LABEL: Record<StatusType, string> = {
+    opened: "已开通",
+    deleted: "已删除",
+    closed: "已注销"
+}
+
 
 
 export default function OpenVPN() {
 
+    const [ page, setPage ] = useState<number>(1)
+    
+    const [ totalPage, setTotalPage ] = useState<number>(0)
+    const [ totalCount, setTotalCount ] = useState<number>(0)
+
+    const [ detailInfo, setDetailInfo ] = useState<{ 
+        countthisWeek: number,
+        compareLastWeek: number,
+        compareLastMonth: number,
+        countDueThisWeek: number,
+        countexpired: number
+    }>({
+        countthisWeek: 0,
+        compareLastWeek: 0,
+        compareLastMonth: 0,
+        countDueThisWeek: 0,
+        countexpired: 0
+    })
+    
+
     const [ recordData, setRecordData ] = useState<OpenVPNRecordType[] | null>(null)
-    const fetchRecords = async () => {
+    const [ isLoading, setIsLoading ] = useState<boolean>(false)
+
+    const fetchRecords = async (currentPage = 1,pageSize = 6, q = "") => {
         console.log("执行了fetchRecord函数")
+        setIsLoading(true)
         try {
-            const res = await fetch("/api/record", {
+            const params = new URLSearchParams({
+                page: String(currentPage),
+                pageSize: String(pageSize),
+            });
+            if (q.trim()) params.set("q", q.trim());
+
+            const res = await fetch(`/api/record?${params.toString()}`, {
                 method: 'GET'
             })
-
             const data = await res.json();
+            console.log()
             if (data?.success) {
+                console.log("加搜索后，前端：", data.records)
                 setRecordData(data.records);
+                const { totalCount, totalPage, page } = data.pagination;
+                const { detailInfo } = data;
+                setTotalPage(totalPage);
+                setTotalCount(totalCount);
+                setPage(page)
+                setDetailInfo(detailInfo)
             }
+
 
         } catch (error) {
             console.log("获取Record失败~")
+
+        } finally {
+            setIsLoading(false)
         }
+
+
+
+        // try {
+        //     const res = await fetch(`/api/record?page=${currentPage}&pageSize=${pageSize}`, {
+        //         method: 'GET'
+        //     })
+
+        //     const data = await res.json();
+        //     if (data?.success) {
+        //         setRecordData(data.records);
+        //         // setTotalPage(data?.totalPage)
+        //         const { totalCount, totalPage, page } = data.pagination;
+        //         const { detailInfo } = data
+        //         setTotalPage(totalPage);
+        //         setTotalCount(totalCount);
+        //         setPage(page)
+        //         setDetailInfo(detailInfo)
+        //     }
+
+        // } catch (error) {
+        //     console.log("获取Record失败~")
+        // } finally {
+        //     setIsLoading(false)
+        // }
     }
 
     const [ userId, setUserId ] = useState<number | null>(null)
@@ -139,12 +144,30 @@ export default function OpenVPN() {
         setNotification({ show: true, type, message })
     }
 
+    // 保持翻页与搜索一致
+    const [ query, setQuery ] = useState<string>("")
+
+    const onChangePage = (page: number) => {
+        // 处理翻页;翻页时戴上当前query关键字（如果有）
+        fetchRecords(page, 6, query)
+    }
+
     // 创建、详情、编辑、删除 弹窗
     const [ showCreatePortal, setShowCreatePortal ] = useState<boolean>(false)
     const [ DetailPortal, setDetailPortal ] = useState<{ show: boolean, record: OpenVPNRecordType | null }>({ show: false, record: null })
     const [ EditPortal, setEditPortal ] = useState<{ show: boolean, record: OpenVPNRecordType | null }>({ show: false, record: null })
     const [ DeletePortal, setDeletePortal ] = useState<{ show: boolean, record: OpenVPNRecordType | null }>({ show: false, record: null })
     
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value)
+    }
+    const handleSearch = () => fetchRecords(1, 6, query);    // 触发搜索
+    const clearSearch = () => {
+        setQuery("");
+        fetchRecords(1, 6, "")
+    }
+
+
     useEffect(() => {
         fetchRecords();
     }, [])
@@ -163,10 +186,32 @@ export default function OpenVPN() {
                 <div className="flex gap-4 items-center">
                     <div className='relative'>
                         <input 
-                            placeholder="搜索记录..." 
+                            placeholder="搜索账号或IP..." 
                             className='outline-none border border-gray-300 p-2 pl-12 rounded-md sm:w-64 placeholder:text-sm focus:border-blue-500 focus:shadow-md'
+                            value={query}
+                            onChange={handleSearchInputChange}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleSearch() }}
                         />
-                        <SearchOutlined className='text-2xl text-gray-400 absolute left-3 top-1/2 -translate-y-1/2' />
+                        <button 
+                            type='button' 
+                            className='absolute left-3 top-1/2 -translate-y-1/2'
+                            onClick={handleSearch}
+                        >
+                            <SearchOutlined className='text-xl text-black' />
+                        </button>
+
+                        {
+                            query && (
+                                <button 
+                                    type='button' 
+                                    className='absolute right-3 top-1/2 -translate-y-1/2  bg-gray-300 h-4 w-4 rounded-full flex items-center justify-center' 
+                                    onClick={clearSearch}
+                                >
+                                    <CloseOutlined className='text-gray-500 text-xs' />
+                                </button>
+                            )
+                        }
+
                     </div>
                     <button 
                         className={`p-2 flex gap-2 bg-teal-500 rounded-md hover:bg-teal-400 hover:-translate-y-0.5 transition-all ${userId === 1 ? "" : "disabled:cursor-not-allowed"}`} 
@@ -189,87 +234,181 @@ export default function OpenVPN() {
                 />
             }
             
-            <ItemCards />
+            <ItemCards totalCount={totalCount} detailInfo={detailInfo} />
 
-            {/* Charts */}
-            <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-                <div className='flex flex-col gap-2 lg:col-span-2 bg-white p-5  rounded-lg shadow-md'>
-                    <div className='flex justify-between'>
-                        <h3 className='font-bold text-lg'>记录趋势</h3>
-                        <div className='flex gap-4'>
-                            <button>周</button>
-                            <button>月</button>
+            {/* 表格容器 - 设置最小高度防止抖动 */}
+            <div className='bg-white rounded-lg shadow-md min-h-[500px] flex flex-col'>
+                {
+                    isLoading ? (
+                        <div className='flex-1 flex items-center justify-center h-[400px]'>
+                            <div className='flex flex-col items-center gap-4'>
+                                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500'></div>
+                                <span className='text-gray-500'>加载中....</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div className=''>
-                    
-                    </div>
-                </div>
+                    ) : recordData && recordData.length > 0 ? (
+                            <>
+                                <div className='overflow-x-auto mb-2 border border-gray-200 overflow-hidden h-[430px]'>
+                                    <table className='w-full divide-y divide-gray-50'>
+                                        <thead className='bg-gray-50 border-b border-gray-200 sticky top-0 z-10'>
+                                            <tr>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请人</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请部门</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>账号/IP</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请日期</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>目的IP-端口</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请类型</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请原因</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>截止日期</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>状态</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>备注</th>
+                                                <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>操作</th>
+                                            </tr>
 
-                <div className='bg-white p-5  rounded-lg shadow-md'>
-                    <div className=''>
-                        <h3 className='font-bold text-lg'>申请类型分布</h3>
-                    </div>
-                    
-                </div>
+                                        </thead>
+                                        <tbody className='bg-white divide-y divide-gray-200'>
+                                            {
+                                                recordData.map((record) => (
+                                                    <tr key={record.id} className='hover:bg-gray-50 transition-colors h-16'>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            <div className='h-10 flex items-center'>{record.name}</div>
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            <div className='h-10 flex items-center'>{record.sector}</div>
+                                                        </td>
+                                                        <td className='px-5 py-3 align-top'>
+                                                            <div className='h-10 flex flex-col justify-center gap-1 overflow-hidden line-clamp-2 text-ellipsis break-words space-y-1' title={record.account_ip}>
+                                                                {record.account_ip.split(";").slice(0,1).map((r, index) => (
+                                                                    <span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider truncate'>{r}</span>
+                                                                ))}
+                                                                {record.account_ip.split(";").length > 2 && (
+                                                                    <span className='text-xs text-blue-400'>+{record.account_ip.split(";").length - 1}更多</span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            <div className='h-10 flex items-center'>{new Date(record.apply_date).toISOString().split('T')[0]}</div>
+                                                        </td>
+                                                        <td className='px-5 py-3 align-top space-y-1'>
+                                                            <div className='h-10 flex flex-col gap-1 justify-center overflow-hidden' title={record.dest_ip}>
+                                                                
+                                                                { record.dest_ip.split(";").slice(0,1).map((r, index) => (
+                                                                    <span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider truncate'>{r}</span>
+                                                                ))}
+                                                                { record.dest_ip.split(';').length > 2 && (
+                                                                    <span className='text-xs text-blue-400'>+{record.dest_ip.split(';').length - 1}更多</span>
+                                                                ) }
+                                                            </div>
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            <div className='h-10 flex items-center'>{RuleType_LABEL[record.type as RuleType]}</div>
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            <div className='h-10 flex items-center'>
+                                                                <span className='truncate max-w-24' title={record.type === 'close_account' ? "离职" : record.reason}>
+                                                                    {record.type === 'close_account' ? "离职" : record.reason}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            <div className='h-10 flex items-center'>{record.apply_duration}</div>
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            {/* <div className={`h-10 flex items-center`}>{StatusType_LABEL[record.status as StatusType]}</div> */}
+                                                            {
+                                                                (record.apply_duration !== '永久' && record.status !== 'deleted' && (() => {
+                                                                    const d = new Date(record.apply_duration + 'T00:00:00');
+                                                                    const today = new Date();
+                                                                    today.setHours(0,0,0,0);
+                                                                    return !Number.isNaN(d.getTime()) && d < today;
+                                                                })()) ?
+                                                                <span className='h-10 flex font-bold items-center text-red-500'>已过期</span> : 
+                                                                <span className={`h-10 flex items-center`}>{StatusType_LABEL[record.status as StatusType]}</span>
+                                                            }
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider align-top'>
+                                                            <div className='h-10 flex items-center'>
+                                                                <span className='truncate max-w-24' title={record.description}>{record.description}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className='px-5 py-3 text-left text-sm font-medium text-gray-500 tracking-wider'>
+                                                            <div className='flex gap-3'>
+                                                                <button title='查看详情' onClick={() => setDetailPortal({show: true, record})}>
+                                                                    <EyeFilled className='text-blue-500 hover:text-blue-400 text-base' />
+                                                                </button>
+                                                                <button 
+                                                                    title='编辑' disabled={userId === 1 ? false : true} className={`${userId === 1 ? "" : "disabled:cursor-not-allowed"}`}
+                                                                    onClick={() => setEditPortal({ show: true, record })}
+                                                                >
+                                                                    <EditFilled className='text-yellow-500 hover:text-yellow-400 text-base' />
+                                                                </button>
+                                                                <button 
+                                                                    title='删除' 
+                                                                    disabled={userId === 1 ? false : true} className={`${userId === 1 ? "" : "disabled:cursor-not-allowed"}`}
+                                                                    onClick={() => setDeletePortal({ show: true, record })}
+                                                                >
+                                                                    <DeleteFilled className='text-red-500 hover:text-red-400 text-base' />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            }
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                
+                                {
+                                    DetailPortal.show && 
+                                    <DetailRecord  show={DetailPortal.show} onClose={() => setDetailPortal(prev => ({...prev, show: false}))} record={DetailPortal.record} />
+                                }
+                                
+                                {
+                                    DeletePortal.show && 
+                                    <DeleteRecord 
+                                        show={DeletePortal.show} 
+                                        onClose={() => setDeletePortal(prev => ({...prev, show: false}))} 
+                                        record={DeletePortal.record}
+                                        onNotify={onNotify}
+                                        fetchRecords={fetchRecords}
+                                        
+                                    />
+                                }
+
+                                {
+                                    EditPortal.show && 
+                                    <EditRecord 
+                                        show={EditPortal.show} 
+                                        onClose={() => setEditPortal(prev => ({...prev, show: false}))} 
+                                        onNotify={onNotify}  
+                                        fetchRecords={fetchRecords} 
+                                        record={EditPortal.record} 
+                                    />
+                                }
+
+                                <Pagination page={page} totalCount={totalCount} totalPage={totalPage} onChangePage={onChangePage} isLoading={isLoading} />
+
+                            </>
+                        ) : (
+                            <div className='flex items-center justify-center mt-5'>
+                                <span className='font-light text-gray-500'>暂无记录</span>
+                            </div>
+                        )
+            
+                }
             </div>
 
-            <div className='p-5 bg-white rounded-lg shadow-md'>
-                <div className='flex flex-col md:flex-row justify-between'>
-                    <div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-                        <div className='flex flex-col gap-2'>
-                            <span className='font-light text-sm'>申请类型</span>
-                            <select className='p-2 pl-4 pr-10 outline-none border border-gray-200 rounded-md focus:border-blue-400 w-full'>
-                                <option>全部类型</option>
-                                <option>开通账号</option>
-                                <option>开通规则</option>
-                                <option>申请账号+开通规则</option>
-                                <option>注销账号</option>
-                                <option>删除规则</option>
-                            </select>
-                        </div>
 
-                        <div className='flex flex-col gap-2'>
-                            <span className='font-light text-sm'>申请日期</span>
-                            <select className='p-2 pl-4 pr-10 outline-none border border-gray-200 rounded-md focus:border-blue-400 w-full'>
-                                <option>全部日期</option>
-                                <option>近7天</option>
-                                <option>近30天</option>
-                            </select>
-                        </div>
-
-                        <div className='flex flex-col gap-2'>
-                            <span className='font-light text-sm'>状态</span>
-                            <select className='p-2 pl-4 pr-10 outline-none border border-gray-200 rounded-md focus:border-blue-400 w-full'>
-                                <option>全部状态</option>
-                                <option>已开通</option>
-                                <option>已删除</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className='flex gap-4 items-end'>
-                        <button className='outline-none border border-gray-300 p-2 px-4 rounded-lg hover:bg-gray-100'>重置筛选</button>
-                        <button className='outline-none bg-blue-500 text-white p-2 px-4 rounded-lg hover:bg-blue-400'>应用筛选</button>
-                    </div>
-
-                </div>
-            </div>
-
-
-            {
+            {/* {
                 recordData ? (
                     <div className='bg-white rounded-lg shadow-md'>
-                        <div className='overflow-x-auto mb-2 border border-gray-200'>
-                            <table className='min-w-full divide-y divide-gray-50'>
-                                <thead className='bg-gray-50'>
+                        <div className='overflow-x-auto mb-2 border border-gray-200 overflow-hidden'>
+                            <table className='w-full divide-y divide-gray-50 min-h-[400px]'>
+                                
+                                <thead className='bg-gray-50 border-b border-gray-200'>
                                     <tr>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>
-                                            <div className='flex items-center'>
-                                                <input type='checkbox' className='' />
-                                            </div>
-                                        </th>
                                         <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请人</th>
                                         <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请部门</th>
                                         <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>账号/IP</th>
@@ -288,9 +427,6 @@ export default function OpenVPN() {
                                     {
                                         recordData.map((record) => (
                                             <tr key={record.id} className='hover:bg-gray-50 transition-colors'>
-                                                <td className='px-5 py-3 whitespace-nowrap'>
-                                                    <input type='checkbox' />
-                                                </td>
                                                 <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.name}</td>
                                                 <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.sector}</td>
                                                 <td className='px-5 py-3'>
@@ -308,7 +444,7 @@ export default function OpenVPN() {
                                                 <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.type === 'close_account' ? "离职" : record.reason}</td>
                                                 <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.apply_duration}</td>
                                                 <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.type === 'close_account' ? "已删除" : record.status }</td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.description}</td>
+                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider max-w-40'>{record.description}</td>
                                                 <td className='px-5 py-3 text-left text-sm font-medium text-gray-500 tracking-wider'>
                                                     <div className='flex gap-3'>
                                                         <button title='查看详情' onClick={() => setDetailPortal({show: true, record})}>
@@ -366,7 +502,7 @@ export default function OpenVPN() {
                             />
                         }
 
-                        <Pagination />
+                        <Pagination page={page} totalCount={totalCount} totalPage={totalPage} onChangePage={onChangePage} />
 
                     </div>
                 ) : (
@@ -374,7 +510,7 @@ export default function OpenVPN() {
                         <span className='font-light text-gray-500'>暂无记录</span>
                     </div>
                 )
-            }
+            } */}
 
 
             {/* 提示 */}

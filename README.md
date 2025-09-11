@@ -218,3 +218,17 @@ const user_id = getUserId();
 ```
 通过脚本收集信息，api推送到server --- 入库 --- web展示（颗粒度 天/周/月）
 ```
+
+- [ ] 数据缓存revalidate 与  revalidatePath或revalidateTag(主动刷新)
+- [ ] 分页
+```
+1.展示页：当前页、总页数；上一页、下一页；请求url携带page（当前页）、pageSize（每页显示几条数据）；默认（组件挂载时，显示第一页，即page=1）
+2.api接口：根据传递参数获取数据 
+const data = await prispma.database.findMany({
+    skip,        // 跳过多少条数据，值是(page - 1) * pageSize
+    limit,       // 限制多少条，即pageSize
+    orderBy: {
+        apply_date: 'desc'    // 根据apply_date字段排序
+    }
+})
+```

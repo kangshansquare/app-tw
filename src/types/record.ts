@@ -8,6 +8,6 @@ export interface OpenVPNRecordType {
     type: "open_rule" | "apply_account" | "delete_rule" | "close_account" | "account_and_rule",
     reason: string;
     apply_duration: string;
-    status: "已开通" | "已删除" | "已注销";
+    status: "opened" | "deleted" | "closed";
     description: string;
 }

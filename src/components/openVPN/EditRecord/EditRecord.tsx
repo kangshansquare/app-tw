@@ -14,6 +14,13 @@ interface EditRecordProps {
     fetchRecords: () => void
 }
 
+type StatusType = "opened" | "deleted" | "closed"
+const StatusType_LABEL: Record<StatusType, string> = {
+    opened: "已开通",
+    deleted: "已删除",
+    closed: "已注销"
+}
+
 
 export default function EditRecord({ show, onClose, record, onNotify, fetchRecords }: EditRecordProps) {
 
@@ -169,13 +176,27 @@ export default function EditRecord({ show, onClose, record, onNotify, fetchRecor
                                 </div>
 
                                 <div className='flex flex-col gap-2'>
-                                    <label className='font-medium text-gray-500 text-sm'>申请时长</label>
+                                    <label className='font-medium text-gray-500 text-sm'>截止日期</label>
                                     <input 
                                         className='outline-none border border-gray-300 p-2 rounded-lg focus:border-blue-500 placeholder:text-sm' 
                                         name='apply_duration' 
                                         value={updateRecord?.apply_duration}
                                         onChange={handleChange}
                                     />
+                                </div>
+                                <div className='flex flex-col gap-2'>
+                                    <label className='font-medium text-gray-500 text-sm'>状态</label>
+                                    <select 
+                                        name='status' 
+                                        value={updateRecord?.status}
+                                        className="outline-none border  p-2 rounded-lg border-gray-300 focus:border-blue-500"
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">请选择状态</option>
+                                        <option value="opened">已开通</option>
+                                        <option value="deleted">已删除</option>
+                                        <option value="closed">已注销</option>
+                                    </select>
                                 </div>
                             </div>
                             

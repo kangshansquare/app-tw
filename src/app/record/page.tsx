@@ -1,6 +1,8 @@
 import OpenVPN from "@/components/openVPN/openVPN"
 
-export default function Record() {
+export default async function Record() {
+
+    
     
     return (
         <OpenVPN />

@@ -25,7 +25,7 @@ export default function CreateRecord({ show, onClose, onNotify, fetchRecords }: 
         type: "open_rule",
         reason: "工作需要",
         apply_duration: "永久",
-        status: "已开通",
+        status: "opened",
         description: ""
     })
 
@@ -34,7 +34,7 @@ export default function CreateRecord({ show, onClose, onNotify, fetchRecords }: 
 
         setDefaultFormData(prev => ({
             ...prev,
-            [name]: name === 'apply_date' ? (value ? new Date(value) : null) : value
+            [name]: name === 'apply_date' ? (value ? new Date(value) : null) : value 
         }))
     }    
 
@@ -45,10 +45,18 @@ export default function CreateRecord({ show, onClose, onNotify, fetchRecords }: 
     const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
     
+        setError({})
         if (!defaultFormData.account_ip) {
             setError({ account_ip: true })
             return;
         }
+
+        if (!defaultFormData.status) {
+            setError({ status: true })
+            return;
+        }
+
+
 
         console.log("用户输入的表单数据: ", defaultFormData)
         // 调用api，创建record，提示（成功失败）；关闭创建记录模态框，通知父组件（刷新数据）
@@ -119,7 +127,7 @@ export default function CreateRecord({ show, onClose, onNotify, fetchRecords }: 
                                     <label className='font-medium text-gray-500 text-sm'>申请类型</label>
                                     <select 
                                         name='type' 
-                                        value={defaultFormData.type}
+                                        value={defaultFormData['type']}
                                         className="outline-none border  p-2 rounded-lg border-gray-300 focus:border-blue-500"
                                         onChange={handleChange}
                                     >
@@ -154,14 +162,28 @@ export default function CreateRecord({ show, onClose, onNotify, fetchRecords }: 
                                 </div>
 
                                 <div className='flex flex-col gap-2'>
-                                    <label className='font-medium text-gray-500 text-sm'>申请时长</label>
+                                    <label className='font-medium text-gray-500 text-sm'>截止日期</label>
                                     <input 
                                         className='outline-none border border-gray-300 p-2 rounded-lg focus:border-blue-500 placeholder:text-sm' 
-                                        placeholder='7天、30天、永久' 
+                                        placeholder='永久、yyyy-mm-dd' 
                                         name='apply_duration' 
                                         value={defaultFormData['apply_duration']}
                                         onChange={handleChange}
                                     />
+                                </div>
+                                <div className='flex flex-col gap-2'>
+                                    <label className='font-medium text-gray-500 text-sm'>状态</label>
+                                    <select 
+                                        name='status' 
+                                        value={defaultFormData['status']}
+                                        className={`outline-none border  p-2 rounded-lg  focus:border-blue-500 ${error.status ? "border-red-500" : "border-gray-300"}`}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">请选择状态</option>
+                                        <option value="opened">已开通</option>
+                                        <option value="deleted">已删除</option>
+                                        <option value="closed">已注销</option>
+                                    </select>
                                 </div>
                             </div>
                             
