@@ -9,11 +9,11 @@ interface TipInputProps {
 
 
 export default function TipInput({ tip, handleTipsItemInputChange }: TipInputProps) {
-    const isChecked = tip.status === "已完成"
+    const isChecked = tip.status === "done"
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>, tip: TipsData) => {
         console.log("TipInput has changed: ", e.currentTarget.checked)
-        handleTipsItemInputChange({...tip, status: e.currentTarget.checked ? "已完成": "未完成"})
+        handleTipsItemInputChange({...tip, status: e.currentTarget.checked ? "done": "pending"})
     }
 
 

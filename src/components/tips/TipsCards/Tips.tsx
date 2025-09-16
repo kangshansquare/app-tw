@@ -2,6 +2,8 @@
 
 interface TipsCardsProps {
     tips: Array<{ title: string, content: string, ExpireDate: Date, status: string, priority: string, create_time: Date, update_time: Date }>;
+    totalCount: number;
+    details: Record<string, unknown>
 }
 
 // type TipsDetail = '总任务数' | '待完成' | '已完成' | '已逾期';
@@ -10,7 +12,9 @@ interface TipsCardsProps {
 // }
 
 
-export default function TipCards({  tips }: TipsCardsProps) {
+export default function TipCards({  tips, totalCount, details }: TipsCardsProps) {
+
+    console.log('TipsCards--------------',details, typeof details.compare_last_week === 'string')
 
     function getDateTimeToString(date: Date) {
         const dateFormat = new Date(date)
@@ -29,7 +33,7 @@ export default function TipCards({  tips }: TipsCardsProps) {
 
     console.log('TipsCards: ', tips)
 
-    const TipsCount = tips.length;
+    // const TipsCount = tips.length;
     const TipsUnfinished = tips.filter(item => item.status === '未完成').length;
     const TipsFinished = tips.filter(item => item.status === '已完成').length;
     const TipsExpired = tips.filter(item => item.status === '已逾期').length;
@@ -50,11 +54,11 @@ export default function TipCards({  tips }: TipsCardsProps) {
                 <div className="flex items-center justify-between p-4 rounded-xl">
                     <div className="flex flex-col">
                         <span>总任务数</span>
-                        <span className="font-bold text-2xl">{TipsCount}</span>
+                        <span className="font-bold text-2xl">{totalCount}</span>
                     </div>
                     <div className="bg-indigo-100 w-10 h-10" />
                 </div>
-                <span className="text-green-400 text-sm pl-4 pb-4">较昨日增加 {TodayCreateCount} 项</span>
+                <span className="text-green-400 text-sm pl-4 pb-4">较上周 项</span>
             </div>
 
             <div className="flex flex-col bg-white">
@@ -65,7 +69,7 @@ export default function TipCards({  tips }: TipsCardsProps) {
                     </div>
                     <div className="bg-yellow-100 w-10 h-10" />
                 </div>
-                <span className="text-yellow-400 text-sm pl-4 pb-4">{ TipsSoonToExpire } 项即将到期</span>
+                <span className="text-yellow-400 text-sm pl-4 pb-4">{ TipsSoonToExpire } 项本周到期</span>
             </div>
 
             <div className="flex flex-col bg-white">
@@ -76,7 +80,7 @@ export default function TipCards({  tips }: TipsCardsProps) {
                     </div>
                     <div className="bg-teal-100 w-10 h-10" />
                 </div>
-                <span className="text-green-400 text-sm pl-4 pb-4">完成率 { TipsFinished == 0 ? '0' : ((TipsFinished / TipsCount) * 100).toFixed(0) } %</span>
+                <span className="text-green-400 text-sm pl-4 pb-4">完成率 { TipsFinished == 0 ? '0' : ((TipsFinished / totalCount) * 100).toFixed(0) } %</span>
             </div>
 
             <div className="flex flex-col bg-white">

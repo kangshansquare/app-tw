@@ -3,62 +3,63 @@ import { prisma } from "@/lib/prisma";
 import type { TipsFormData } from "@/types/tips";
 
 
-export async function GetAll(user_id: number | null) {
+// export async function GetAll(user_id: number | null) {
 
-    if (user_id === null) return NextResponse.json({ success: false })
+//     if (user_id === null) return NextResponse.json({ success: false })
 
     
-    function getStatus(tip: { ExpireDate: Date, status: string }) {
-        const now = new Date();
-        const expire = new Date(tip.ExpireDate)
+//     function getStatus(tip: { ExpireDate: Date, status: string }) {
+//         const now = new Date();
+//         const expire = new Date(tip.ExpireDate)
 
-        if (tip.status === '已完成') return '已完成';
-        if (expire < now) return '已逾期';
+//         if (tip.status === '已完成') return '已完成';
+//         if (expire < now) return '已逾期';
 
-        return '未完成';
-    }
+//         return '未完成';
+//     }
 
-    try {
+//     try {
 
-        const tips = await prisma.tips.findMany({
-            where: {
-                user_id: user_id
-            }
-        })
+//         const tips = await prisma.tips.findMany({
+//             where: {
+//                 user_id: user_id
+//             }
+//         })
 
-        const tipsWithStatus = tips.map(tip => ({
-            ...tip,
-            status: getStatus(tip)
-        }))
+//         const tipsWithStatus = tips.map(tip => ({
+//             ...tip,
+//             status: getStatus(tip)
+//         }))
 
 
-        return NextResponse.json({ success: true, tips: tipsWithStatus })
+//         return NextResponse.json({ success: true, tips: tipsWithStatus })
 
-    } catch (error) {
-        return NextResponse.json({ success: false })
-    }
+//     } catch (error) {
+//         return NextResponse.json({ success: false })
+//     }
     
-}
+// }
 
-export async function CreateTips({ title, content, ExpireDate, priority, status, user_id }: TipsFormData) {
+// export async function CreateTips({ title, content, ExpireDate, priority, status, user_id }: TipsFormData) {
 
-    // console.log({ title, content, ExpireDate, priority, status, user_id })
+//     // console.log({ title, content, ExpireDate, priority, status, user_id })
+    
     
 
-    try {
-        await prisma.tips.create({
-            data: { title, content, ExpireDate: new Date(ExpireDate), status, priority, user_id }
-        })
-    } catch (error) {
-        console.log("创建失败！", error)
-        return NextResponse.json({ success: false })
-    }
+//     try {
+//         await prisma.tips.create({
+//             data: { title, content, ExpireDate, status, priority, user_id }
+//         })
+//     } catch (error) {
+//         console.log("创建失败！", error)
+//         return NextResponse.json({ success: false })
+//     }
 
-    const response = NextResponse.json({
-        success: true
-    })
-    return response;
-}
+//     const response = NextResponse.json({
+//         success: true
+//     })
+//     return response;
+// }
 
 export async function DeleteTips(id: number, user_id: number) {
     try {

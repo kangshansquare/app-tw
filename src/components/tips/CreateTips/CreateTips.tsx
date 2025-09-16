@@ -2,6 +2,10 @@
 import ReactDOM  from "react-dom";
 import { CloseCircleFilled } from '@ant-design/icons';
 import { useState } from "react";
+import { TipsData } from "@/types/tips";
+
+
+
 
 
 interface CreateTipsProps {
@@ -16,28 +20,39 @@ interface CreateTipsProps {
 export default function CreateTips({ show, onClose, user_id, onCreated, onNotify }: CreateTipsProps) {
 
     const [ messages, setMessages ] = useState<string | null>(null)
-
+    
 
     const closeModel = (e: React.MouseEvent<HTMLDivElement> ) => {
         if (e.target === e.currentTarget) onClose();
     }
 
+    const [ error, setError ] = useState<{ [key: string]: boolean }>({})
+
+    const [ defaultFromData, setDefaultFormData ] = useState<Partial<TipsData>>({})
+
+    const handleChaneg = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.currentTarget;
+        console.log('-----', name, value)
+        setDefaultFormData(prev => ({
+            ...prev,
+            [name]: name === 'ExpireDate' ? (value ? new Date(value) : null) : value
+        }))
+        if (error[name]) setError(prev => ({ ...prev, [name]: false }))
+        
+    }
+
     const handleCreateTipsForm = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        
+        const requiredFields = ['title', 'content', 'ExpireDate', 'status'];
+        const nextError: { [key: string]: boolean } = {};
+        requiredFields.forEach(f => {
+            const v = (defaultFromData as any)[f];
+            if (!v || (v instanceof Date && isNaN(v.getTime()))) nextError[f] = true
+        })
 
-        const formData = new FormData(e.currentTarget);
-        const title = formData.get('title') as string;
-        const content = formData.get('content') as string;
-        const ExpireDate = formData.get('ExpireDate')
-        const priority = formData.get('priority') as string
-        const status = formData.get('status') as string
-
-        console.log(title, content, ExpireDate, priority);
-
-        if (!title || !content || !ExpireDate) {
-            setMessages("请填写信息！")
+        if (Object.keys(nextError).length > 0) {
+            setError(nextError);
             return;
         }
 
@@ -48,7 +63,8 @@ export default function CreateTips({ show, onClose, user_id, onCreated, onNotify
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ title, content, ExpireDate, priority, status, user_id })
+                // body: JSON.stringify({ title, content, ExpireDate, priority, status, user_id })
+                body: JSON.stringify({ tip: defaultFromData, user_id })
             })
 
             const data = await res.json();
@@ -58,7 +74,7 @@ export default function CreateTips({ show, onClose, user_id, onCreated, onNotify
                 if (onCreated) onCreated();    // 新增，通知父组件刷新
 
                 setTimeout(() => {
-                    setMessages(null);
+                    // setMessages(null);
                     onNotify("success", "创建成功")
                     onClose();
                     
@@ -90,23 +106,26 @@ export default function CreateTips({ show, onClose, user_id, onCreated, onNotify
                             <div className="flex flex-col gap-1">
                                 <label className="text-sm">任务标题</label>
                                 <input 
-                                    className="border border-gray-300 rounded-xl outline-none p-3 focus:border-blue-600 focus:ring-2" placeholder="输入任务标题"
+                                    className={`border ${error.title ? "border-red-300" : "border-gray-300"} rounded-xl outline-none p-3 focus:border-blue-600 focus:ring-2`} placeholder="输入任务标题"
                                     name="title"
+                                    onChange={handleChaneg}
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
                                 <label className="text-sm">任务描述</label>
                                 <textarea 
-                                    className="border border-gray-300 rounded-xl outline-none p-3 focus:border-blue-600 focus:ring-2" placeholder="输入任务详情描述" 
+                                    className={`border ${error.content ? "border-red-300" : "border-gray-300"} rounded-xl outline-none p-3 focus:border-blue-600 focus:ring-2`} placeholder="输入任务详情描述" 
                                     name="content"
+                                    onChange={handleChaneg}
                                 />
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm">截止日期</label>
                                 <input 
                                     type="date" 
-                                    className="border border-gray-300 rounded-xl p-2 outline-none focus:border-blue-600 focus:ring-2 w-1/2"
+                                    className={`border ${error.ExpireDate ? "border-red-300" : "border-gray-300"} rounded-xl p-2 outline-none focus:border-blue-600 focus:ring-2 w-1/2`}
                                     name="ExpireDate"
+                                    onChange={handleChaneg}
                                 />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -114,24 +133,26 @@ export default function CreateTips({ show, onClose, user_id, onCreated, onNotify
                                     <span className="text-sm">优先级</span>
                                     <div className="flex gap-3 py-2">
                                         <label className="flex gap-2">
-                                            <input type="radio" name="priority" value="low" />
+                                            <input type="radio" name="priority" value="low" onChange={handleChaneg} />
                                             低
                                         </label>
                                         <label className="flex gap-2">
-                                            <input type="radio" name="priority" value="medium" defaultChecked />
+                                            <input type="radio" name="priority" value="medium" defaultChecked onChange={handleChaneg} />
                                             中
                                         </label>
                                         <label className="flex gap-2">
-                                            <input type="radio" name="priority" value="high" />
+                                            <input type="radio" name="priority" value="high" onChange={handleChaneg} />
                                             高
                                         </label>
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <label className="text-sm">状态</label>
-                                    <select id="taskStaus" className="border border-gray-300 outline-none px-4 py-2 rounded-xl mb-4" name="status">
-                                        <option defaultChecked>未完成</option>
-                                        <option>已完成</option>
+                                    <select id="taskStaus" className={`border ${error.status ? "border-red-300" : "border-gray-300"} outline-none px-4 py-2 rounded-xl mb-4`} name="status" onChange={handleChaneg}>
+                                        <option value="">请选择状态</option>
+                                        <option value="pending">未完成</option>
+                                        <option value="done">已完成</option>
+                                        <option value="expired">已逾期</option>
                                     </select>
                                 </div>
                             </div>
@@ -146,9 +167,9 @@ export default function CreateTips({ show, onClose, user_id, onCreated, onNotify
                         </form>
                     </div>
 
-                    <div className="text-center min-h-10 mb-2">
+                    {/* <div className="text-center min-h-10 mb-2">
                         { messages && <p className="text-red-400">{messages}</p> }
-                    </div>
+                    </div> */}
                     
                 </div>
                 

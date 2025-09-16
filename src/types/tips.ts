@@ -1,7 +1,7 @@
 export interface TipsFormData {
     title: string;
     content: string;
-    ExpireDate: string;
+    ExpireDate: Date;
     status: string;
     priority: string;
     user_id: number

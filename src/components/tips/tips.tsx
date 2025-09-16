@@ -9,6 +9,7 @@ import TipsItems from "./TipsItems/TipsItems";
 import Notification from "@/components/Notification/Notification";
 
 
+
 import type { TipsData } from "@/types/tips";
 
 
@@ -22,6 +23,8 @@ export default  function Tips() {
     const [ tips, setTips] = useState<Array<TipsData>>([]);
     const [userId, setUserId] = useState<number | null>(null);
     const [ isLoading, setIsLoading ] = useState<boolean>(false)
+
+    
 
     const getUserId = async () => {
         const res = await fetch('/api/user/get-id', {
@@ -50,15 +53,18 @@ export default  function Tips() {
 
     // 点击button显示4种状态的tip：all（全部）、pending（待完成）、done(已完成)、expired（已逾期）
     const [ currentButton, setCurrentButton ] = useState<'all' | 'pending' | 'done' | 'expired'>('all')
+    console.log("前端Tips:", tips)
     const filteredTips = tips.filter(tip => {
         if (currentButton === 'all') return true;
-        if (currentButton === 'pending') return tip.status === '未完成';
-        if (currentButton === 'done') return tip.status === '已完成';
-        if (currentButton === 'expired') return tip.status === '已逾期';
+        if (currentButton === 'pending') return tip.status === 'pending';
+        if (currentButton === 'done') return tip.status === 'done';
+        if (currentButton === 'expired') return tip.status === 'expired';
 
         return true;
     })
     
+    
+
 
     const handleTipsItemInputChange =  async (tip: TipsData) => {
 
@@ -82,35 +88,39 @@ export default  function Tips() {
                 fetchTips();
             } else {
                 console.log("更新失败~")
+                onNotify('error', '更新失败')
             }
 
         } catch (error) {
             console.log("更新异常", error)
         }
-        
-        
+         
     }
 
         
     const [ showCreateTips, setShowCreateTips ] = useState<boolean>(false)
-
-
     const handleCreateTips: React.MouseEventHandler<HTMLButtonElement> = () => {
         console.log("Create Tips~")
         setShowCreateTips(true)
     }
 
-    const handleLoadTips = () => {
-        console.log("Load more tips~")
-    }
+    
+    const [ totalCount, setTotalCount ] = useState<number>(0)
+    const [ details, setDetails ] = useState<Record<string, unknown>>({})
 
+    // const onChangePage = (page: number) => {
+    //     fetchTips(page, 5)
+    // }
     const fetchTips = async () => {
         if (userId === null) return;
 
         setIsLoading(true)
 
         try {
-            const res = await fetch(`/api/tips?user_id=${userId}`, {
+            const params = new URLSearchParams({
+                user_id: String(userId),
+            })
+            const res = await fetch(`/api/tips?${params.toString()}`, {
                 method: 'GET',
                 credentials: 'include',
                 
@@ -119,6 +129,14 @@ export default  function Tips() {
             
             if (data?.success) {
                 setTips(data.tips);
+                const { totalCount } = data.pagination;
+                
+                console.log("page,totalPage,totalCount", totalCount)
+                console.log("------------DetailInfo-----------", data.detailInfo)
+                setTotalCount(totalCount)
+                setDetails(data.detailInfo)
+                
+                
             }
         } catch(error) {
             onNotify("error", "网络错误")
@@ -161,18 +179,20 @@ export default  function Tips() {
                 /> 
             }
 
-            <TipCards tips={tips} />
+            <TipCards tips={tips} totalCount={totalCount} details={details} />
 
             <div className="flex justify-start gap-5">
                 <button 
                     className="outline-none p-2 pl-4 pr-4 bg-btn-primary text-white rounded-xl"
                     onClick={() => setCurrentButton('all')}
+                    
                 >
                     全部
                 </button>
                 <button 
                     className="outline-none p-2 pl-4 pr-4 bg-yellow-500 text-white hover:bg-yellow-400 transition-colors rounded-xl"
                     onClick={() => setCurrentButton('pending')}
+                    
                 >
                     待完成
                 </button>
@@ -191,33 +211,38 @@ export default  function Tips() {
             </div>
 
             {
-                isLoading ? (
-                    <div className='flex-1 flex items-center justify-center h-[400px]'>
-                        <div className='flex flex-col items-center gap-4'>
-                            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500'></div>
-                            <span className='text-gray-500'>加载中....</span>
+                    isLoading ? (
+                        <div className='flex-1 flex items-center justify-center h-[400px]'>
+                            <div className='flex flex-col items-center gap-4'>
+                                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500'></div>
+                                <span className='text-gray-500'>加载中....</span>
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <TipsItems 
-                        tips={filteredTips}  
-                        user_id={userId} 
-                        handleTipsItemInputChange={handleTipsItemInputChange} 
-                        fetchTips={fetchTips}
-                        setNotification={(type, message) => setNotification({ show: true, type, message })}
-                    />
-                )
-            }
+                    ) : (
+                        <TipsItems 
+                            tips={filteredTips}  
+                            user_id={userId} 
+                            handleTipsItemInputChange={handleTipsItemInputChange} 
+                            fetchTips={fetchTips}
+                            setNotification={(type, message) => setNotification({ show: true, type, message })}
+                        />
+                    )
+                }
 
-            <div className="flex items-center justify-center mt-5">
+                {/* <Pagination  totalCount={totalCount} page={page} totalPage={totalPage} isLoading={isLoading} onChangePage={onChangePage} /> */}
+
+
+            {/* <div className="flex items-center justify-center mt-5">
                 <button 
                     className={`border-gray-300 border bg-white p-3 pl-8 pr-8 rounded-2xl hover:bg-gray-100 ${tips.length === 0 ? "disabled:cursor-not-allowed" : ""}`} 
-                    onClick={handleLoadTips}
+                    // onClick={handleLoadTips}
                     disabled={tips.length === 0}
                 >
                     加载更多
                 </button>
-            </div>
+            </div> */}
+
+            
 
             {/* 新增、更新、删除任务 提醒 */}
             { 

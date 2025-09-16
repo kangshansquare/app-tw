@@ -17,7 +17,7 @@ interface ItemCardsProps {
 export default function ItemCards({ totalCount, detailInfo }: ItemCardsProps) {
 
     const { countthisWeek, compareLastWeek, compareLastMonth, countDueThisWeek, countexpired } = detailInfo
-    const precent = Math.ceil(countDueThisWeek / totalCount)
+    const precent = totalCount > 0 ? Math.round((countDueThisWeek / totalCount) * 100) : 0
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -53,7 +53,7 @@ export default function ItemCards({ totalCount, detailInfo }: ItemCardsProps) {
 
             <div className="flex justify-between border border-gray-300  rounded-xl p-5 hover:shadow bg-white hover:-translate-y-0.5 transition-all">
                 <div className="flex flex-col gap-2">
-                    <span className='text-gray-500 text-sm'>即将到期</span>
+                    <span className='text-gray-500 text-sm'>本周到期</span>
                     <h3 className='font-blod text-2xl'>{countDueThisWeek}</h3>
                     <div className="flex gap-1 text-sm">
                         {/* <ArrowUpOutlined className='text-green-400' /> */}

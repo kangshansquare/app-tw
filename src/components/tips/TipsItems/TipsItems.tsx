@@ -21,18 +21,22 @@ const PRIORITY_LABEL: Record<Priority, string> = {
     low: '低'
 }
 
-type Status = '已完成' | '未完成' | '已逾期';
-
+type Status = 'done' | 'pending' | 'expired';
+const Status_LABEL: Record<Status, string> = {
+    'done': "已完成",
+    'pending': "未完成",
+    'expired': '已逾期'
+}
 const STATUS_COLOR: Record<Status, { borderColor: string, textColor: string }> = {
-    '已完成': {
+    'done': {
         borderColor: 'border-green-500',
         textColor: 'text-green-400'
     },
-    '未完成': {
+    'pending': {
         borderColor: 'border-blue-500',
         textColor: 'text-blue-400'
     },
-    '已逾期': {
+    'expired': {
         borderColor: 'border-red-500',
         textColor: 'text-red-400'
     }
@@ -60,12 +64,12 @@ export default function TipsItems({ tips, handleTipsItemInputChange, user_id, fe
     return (
         <div className="space-y-4">
             { tips.length > 0 ? tips.map((tip, index) => (
-                <div key={index} className={`bg-white rounded-xl p-4 border-l-8 ${STATUS_COLOR[tip.status as Status]['borderColor']} flex flex-col gap-2 hover:shadow-xl`}>
+                <div key={tip.id} className={`bg-white rounded-xl p-4 border-l-8 ${STATUS_COLOR[tip.status as Status]['borderColor']} flex flex-col gap-2 hover:shadow-xl`}>
                     <div className="flex items-start justify-between">
                         <TipInput tip={tip} handleTipsItemInputChange={handleTipsItemInputChange}  />
                         
                         <div className="flex gap-5">
-                            <span className={`${STATUS_COLOR[tip.status as Status]['textColor']} text-xs bg-gray-100 rounded-xl p-2`}>{tip.status}</span>
+                            <span className={`${STATUS_COLOR[tip.status as Status]['textColor']} text-xs bg-gray-100 rounded-xl p-2`}>{Status_LABEL[tip.status as Status]}</span>
                             <button className="" onClick={(e) => {setShowEditTips(true); setTipEdit(tip)}}>
                                 <EditFilled className="hover:cursor-pointer hover:bg-blue-500 hover:text-white hover:scale-110 bg-gray-200 p-2 rounded-full transition-transform" />
                             </button>

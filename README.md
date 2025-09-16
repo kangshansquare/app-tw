@@ -140,12 +140,12 @@ Server Action ?
 
 - [ ] tailwind css 全局变量、响应式布局
 - [ ] middleware
-- [ ] 添加导航：云平台
+- [x] 添加导航：云平台
 ```
 阿里云: /aliyun
 腾讯云：/tencent-clound
 ```
-- [ ] 用户登陆后显示自己的任务
+- [x] 用户登陆后显示自己的任务
 ```
 1.任务表与用户表，通过“外键关联”实现用户与任务绑定
 
@@ -213,6 +213,65 @@ const getUerId = async () => {
 }
 
 const user_id = getUserId();
+
+# 不要从前端给后端传递user_id（app/tips/page.tsx），而是应该使用统一鉴权方式。后端api接口从cookie中获取token
+# 提供从cookie中获取user_id的工具函数 @/lib/auth.ts
+export function getUserIdFrromToken(): number | null {
+    const cookie = cookies().get('token')?.value
+    const auth = headers().get('authorization')?.replace(/^Bearer\s+/i, '');
+    const token = cookie || auth;
+    if (!token) return null;
+    try {
+        // JWT playload 结构要与登录时一致
+        const playload = jwt.verify(token, SECRET_KEY!) as {
+            username: string;
+            userId: number;
+            iat: number;
+            exp: number
+        }
+        return playload.userId;
+    } catch {
+        return null
+    }
+}
+
+# middleware对api接口统一鉴权
+# 对api接口鉴权: 认证接口免鉴权
+const publicApiPaths = ['/api/auth', '/api/register', '/api/check-auth'];
+if (pathname.startsWith('/api') && publicApiPaths.some(path => pathname.startsWith(path))) {
+    return NextResponse.next();
+}
+// 其他api接口需要鉴权
+if (pathname.startsWith('/api')) {
+    if (!token) {
+        return NextResponse.json({
+            success: false,
+            code: 'UNAUTHORIZED',
+            message: 'Unauthorized'
+        }, { status: 401 })
+    }
+}
+export const config = {
+    matcher: [
+        '/api/:path*',
+        ...
+    ]
+}
+
+# 后端接口从cookie中获取user_id
+# api/tip/route.ts
+import { getUserIdFrromToken } from '@/lib/auth';
+const user_id = getUserIdFrromToken();
+if (!user_id) return NextResponse.json({
+    success: false,
+    code: 'UNAUTHORIZED',
+    message: 'Unauthorized'
+}, { status: 401 })
+
+const items = await prisma.tips.findMany({
+    where: { user_id },
+    orderBy: { create_time: 'desc' }
+})
 ```
 - [ ] 监控信息展示
 ```
@@ -220,7 +279,7 @@ const user_id = getUserId();
 ```
 
 - [ ] 数据缓存revalidate 与  revalidatePath或revalidateTag(主动刷新)
-- [ ] 分页
+- [x] 分页
 ```
 1.展示页：当前页、总页数；上一页、下一页；请求url携带page（当前页）、pageSize（每页显示几条数据）；默认（组件挂载时，显示第一页，即page=1）
 2.api接口：根据传递参数获取数据 
@@ -230,5 +289,16 @@ const data = await prispma.database.findMany({
     orderBy: {
         apply_date: 'desc'    // 根据apply_date字段排序
     }
+})
+```
+- [ ] React useCallback、useMemo、Context、自定义hook
+- [ ] AbortController、AbortSignal
+- [ ] 后端zod校验
+- [ ] prisma查询优化
+```
+const grouped = await prisma.tips.groupBy({
+    by: ['status'],
+    _count: { _all: true},
+    where: { user_id: userId }
 })
 ```
