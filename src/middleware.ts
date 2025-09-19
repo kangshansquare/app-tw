@@ -9,13 +9,13 @@ export function middleware(request: NextRequest, response: NextResponse) {
 
     console.log(pathname)
 
-    if (pathname === '/login' || pathname === '/register') {
-        // 如果是登录或注册页面，不需要验证token
+    if (pathname === '/login') {
+        // 如果是登录或注册，不需要验证token
         return NextResponse.next();
     }
 
     // 对api接口鉴权: 认证接口免鉴权
-    const publicApiPaths = ['/api/auth', '/api/register', '/api/check-auth'];
+    const publicApiPaths = ['/api/auth', '/api/check-auth'];
     if (pathname.startsWith('/api') && publicApiPaths.some(path => pathname.startsWith(path))) {
         return NextResponse.next();
     }
