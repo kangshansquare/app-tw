@@ -27,6 +27,10 @@
 
 import useSWR from 'swr';
 
+import { useContext } from 'react';
+import {NotificationContext} from '@/context/NotificationContext';
+
+
 // const fetcher = (url: string) => fetch(url).then(res => res.text())
 
 const fetcher = async (url: string) => {
@@ -41,11 +45,17 @@ const fetcher = async (url: string) => {
 export default function TestComponent() {
     const { data, error, isLoading } = useSWR('/api/test', fetcher);
 
+    const ctx = useContext(NotificationContext)    
+
+
     if (isLoading) return <p>Loading...</p>;
     if (error) return <p>Error loading data</p>;
 
     return (
-        <p>{data}</p>
+        <div>
+            <p>{data}</p>
+            <button className='border border-gray-200 p-2'>显示通知消息</button>
+        </div>
     );
 }
 

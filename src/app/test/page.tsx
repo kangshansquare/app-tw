@@ -13,16 +13,25 @@
 //    }
 // }
 
+'use client';
+
 import TestComponent from "@/components/test/test"
 
+import {NotificationContext} from '@/context/NotificationContext';
+
+
+
+
+
 export default  function Test() {
+    
     
 
 
     return (
-        <main>
+        <NotificationContext.Provider value=''>
             <TestComponent />
             
-        </main>
+        </NotificationContext.Provider>
     )
 }
