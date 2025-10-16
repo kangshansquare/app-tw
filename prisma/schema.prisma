@@ -14,13 +14,14 @@ datasource db {
 }
 
 model User {
-  id           Int     @id @default(autoincrement())
-  email        String  @unique
-  name         String  @unique
+  id           Int          @id @default(autoincrement())
+  email        String       @unique
+  name         String       @unique
   passwordHash String
-  isActive     Boolean @default(true)
-  isAdmin      Boolean @default(false)
+  isActive     Boolean      @default(true)
+  isAdmin      Boolean      @default(false)
   tips         Tips[]
+  middleware   Middleware[]
 }
 
 model Tips {
@@ -48,4 +49,21 @@ model OpenVPN {
   apply_duration String   @default("永久")
   status         String
   description    String   @default("-")
+}
+
+model Middleware {
+  id             Int      @id @default(autoincrement())
+  type           String
+  name           String
+  version        String
+  service_line   String
+  deploy_mode    String
+  ip_port        String?
+  cluster_config Json?
+  description    String?
+  note           String?
+  user_id        Int
+  user           User     @relation(fields: [user_id], references: [id])
+  create_time    DateTime @default(now())
+  update_time    DateTime @default(now()) @updatedAt
 }

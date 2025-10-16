@@ -4,13 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { getDateRange } from "@/utils/dateRange";
 
 
-import { getUserIdFrromToken } from "@/lib/auth";
+import { getUserIdFromToken } from "@/lib/auth";
 
 
 export async function GET(request: NextRequest) {
     const url = request.url;   // http://localhost:3000/api/tips?page=1 
 
-    const guft = getUserIdFrromToken();
+    const guft = getUserIdFromToken();
     console.log("统一鉴权，从token中获取userId: ", guft)
     
     const { searchParams } = new URL(url)

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GetAll, CreateRecord } from "@/lib/openvpn";
 import { prisma } from "@/lib/prisma";
 import { getDateRange } from "@/utils/dateRange";
-import { json } from "stream/consumers";
-import { ColumnWidthOutlined } from "@ant-design/icons";
+
 
 export async function GET(request: NextRequest) {
     

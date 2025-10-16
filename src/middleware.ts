@@ -50,7 +50,7 @@ export const config = {
                 '/profile/:path*', 
                 '/aliyun/:path*', 
                 '/tencent-cloud/:path*', 
-                '/tips/:pth*',
+                '/tips/:path*',
                 '/api/:path*'
             ],
 }

@@ -21,7 +21,7 @@ export default function LayoutContent({ children, isLogin, username, user_id }: 
                     { !isLoginPage && <Menu /> }
                 </div> */}
                 { !isLoginPage && <Menu /> }
-                <div className="flex-[9] bg-white rounded-md">
+                <div className="flex-[9] bg-white rounded-md overflow-auto">
                     {children}
                 </div>
             </div>

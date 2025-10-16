@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import { getUserIdFrromToken } from "@/lib/auth";
+import { getUserIdFromToken } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
     // const SECRET_KEY = process.env.SECRET_KEY || '';
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     // return NextResponse.json({ success: true, userId });
 
-    const userId = getUserIdFrromToken();
+    const userId = getUserIdFromToken();
     if (!userId) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     return NextResponse.json({ success: true, userId })
 }

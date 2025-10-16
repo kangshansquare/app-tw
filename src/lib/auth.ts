@@ -13,7 +13,7 @@ export async function Logout() {
 
 // 后端从Cookie/Authorization头解析JWT，统一鉴权；不要信任前端传给后端的user_id
 // 工具函数getUserIdFromToken，在每个接口里用解析到的userId查询数据库
-export function getUserIdFrromToken(): number | null {
+export function getUserIdFromToken(): number | null {
     const cookie = cookies().get('token')?.value
     const auth = headers().get('authorization')?.replace(/^Bearer\s+/i, '');
     const token = cookie || auth;

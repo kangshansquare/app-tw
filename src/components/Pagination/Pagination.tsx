@@ -16,7 +16,7 @@ interface PaginationProps {
 export default function Pagination({ page, totalPage, totalCount, onChangePage, isLoading }: PaginationProps) {
 
     return (
-        <div className='p-5 flex justify-between'>
+        <div className='p-5 flex justify-between items-center'>
             <span className='text-sm text-gray-400 font-medium'>共{totalPage}页,{totalCount}条记录</span>
             <nav className='flex items-center justify-center gap-2 shadow-sm'>
                 <button 

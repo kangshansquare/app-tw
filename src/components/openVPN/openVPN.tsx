@@ -300,7 +300,7 @@ export default function OpenVPN() {
                                                                 {record.account_ip.split(";").slice(0,1).map((r, index) => (
                                                                     <span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider truncate'>{r}</span>
                                                                 ))}
-                                                                {record.account_ip.split(";").length > 2 && (
+                                                                {record.account_ip.split(";").length >= 2 && (
                                                                     <span className='text-xs text-blue-400'>+{record.account_ip.split(";").length - 1}更多</span>
                                                                 )}
                                                             </div>
@@ -314,7 +314,7 @@ export default function OpenVPN() {
                                                                 { record.dest_ip.split(";").slice(0,1).map((r, index) => (
                                                                     <span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider truncate'>{r}</span>
                                                                 ))}
-                                                                { record.dest_ip.split(';').length > 2 && (
+                                                                { record.dest_ip.split(';').length >= 2 && (
                                                                     <span className='text-xs text-blue-400'>+{record.dest_ip.split(';').length - 1}更多</span>
                                                                 ) }
                                                             </div>
