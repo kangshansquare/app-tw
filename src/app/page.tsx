@@ -1,8 +1,13 @@
+import ServerDashboard from "@/components/Dashboard/ServerDashboard/ServerDashboard";
+import MiddlewareDashboard from "@/components/Dashboard/MiddlewareDashboard/MiddleDashboard";
+
+
 export default function Home() {
 
     return (
-        <div className="w-full h-full">
-            <h1>Hi</h1>
-        </div>
+        <>
+            <ServerDashboard />
+            <MiddlewareDashboard />
+        </>
     );
 }

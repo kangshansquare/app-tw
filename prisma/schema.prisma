@@ -22,6 +22,8 @@ model User {
   isAdmin      Boolean      @default(false)
   tips         Tips[]
   middleware   Middleware[]
+  create_time  DateTime     @default(now())
+  groups       UserGroup[]
 }
 
 model Tips {
@@ -66,4 +68,69 @@ model Middleware {
   user           User     @relation(fields: [user_id], references: [id])
   create_time    DateTime @default(now())
   update_time    DateTime @default(now()) @updatedAt
+  idcId          Int
+  idc            Idc      @relation(fields: [idcId], references: [id])
+}
+
+model Group {
+  id          Int         @id @default(autoincrement())
+  name        String
+  create_time DateTime    @default(now())
+  users       UserGroup[]
+}
+
+model UserGroup {
+  id       Int      @id @default(autoincrement())
+  userId   Int
+  groupId  Int
+  role     String?
+  joinedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  group    Group    @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Idc {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  location    String
+  address     String?
+  contact     String?
+  create_time DateTime     @default(now())
+  cabinets    Cabinet[]
+  middleware  Middleware[]
+}
+
+model Cabinet {
+  id          Int      @id @default(autoincrement())
+  name        String
+  idcId       Int
+  idc         Idc      @relation(fields: [idcId], references: [id])
+  uCount      Int?
+  powerKw     Float?
+  status      String   @default("active")
+  remake      String?
+  create_time DateTime @default(now())
+
+  @@unique([idcId, name])
+}
+
+model ServiceLine {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  owner       String?
+  email       String?
+  status      String
+  create_time DateTime @default(now())
+}
+
+model Logs {
+  id          Int      @id @default(autoincrement())
+  type        String
+  action_time DateTime @default(now())
+  operator    String
+  ip          String?
+  content     String
+  status      String
 }

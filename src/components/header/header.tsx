@@ -8,8 +8,8 @@ export default function Header({ isLogin, username }: { isLogin: boolean, userna
 
 
     return (
-        <div className="bg-gray-800 text-white p-4 flex items-center justify-between">
-            <h3>Header</h3>
+        <div className="bg-[#171717] text-white p-4 flex items-center justify-between">
+            <h3 className='text-xl font-bold'>运维工作台</h3>
             <LoginStatus isLogin={isLogin} username={username} />
         </div>
     )

@@ -48,8 +48,8 @@ export const config = {
                 '/tools/:path*', 
                 '/record/:path*', 
                 '/profile/:path*', 
-                '/aliyun/:path*', 
-                '/tencent-cloud/:path*', 
+                '/idc/:path*', 
+                '/cloud/:path*', 
                 '/tips/:path*',
                 '/api/:path*'
             ],

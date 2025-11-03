@@ -2,7 +2,19 @@
 
 import Link from "next/link"
 
-import { ToolOutlined, DatabaseOutlined, HighlightFilled, HomeFilled, CloudFilled, DownOutlined, AliyunOutlined, QqOutlined, PushpinFilled, PieChartOutlined } from "@ant-design/icons";
+import { 
+    ToolOutlined, 
+    DatabaseOutlined, 
+    HighlightFilled, 
+    HomeFilled, 
+    HddOutlined, 
+    DownOutlined, 
+    AliyunOutlined, 
+    QqOutlined, 
+    PushpinFilled, 
+    PieChartOutlined,
+    SettingOutlined
+} from "@ant-design/icons";
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -23,15 +35,24 @@ export default function Menu() {
             { label: "记录", href: "/record", icon: <HighlightFilled className="text-lg" /> },
             { label: "中间件管理", href: "/middle", icon: <DatabaseOutlined className="text-lg" /> },
             { 
-                label: "云平台",
-                icon: <CloudFilled className="text-lg" />,
+                label: "服务器管理",
+                icon: <HddOutlined className="text-lg" />,
                 children: [
-                    { label: "阿里云", href: "/aliyun", icon: <AliyunOutlined /> },
-                    { label: "腾讯云", href: "/tencent-cloud", icon: <QqOutlined /> }
+                    { label: "IDC管理", href: "/idc" },
+                    { label: "云平台管理", href: "/cloud" }
                 ]
             },
+            // { 
+            //     label: "云平台",
+            //     icon: <CloudFilled className="text-lg" />,
+            //     children: [
+            //         { label: "阿里云", href: "/aliyun", icon: <AliyunOutlined /> },
+            //         { label: "腾讯云", href: "/tencent-cloud", icon: <QqOutlined /> }
+            //     ]
+            // },
             { label: "提醒事项", href: "/tips", icon: <PushpinFilled className="text-lg" /> },
-            { label: "监控展示", href: "/monitor", icon: <PieChartOutlined className="text-lg" /> }
+            { label: "监控展示", href: "/monitor", icon: <PieChartOutlined className="text-lg" /> },
+            { label: "系统管理", href: "/system-manage", icon: <SettingOutlined className="text-lg" /> }
         ]
 
     const baseLinkClass = "flex items-center gap-3 ml-1 mr-1 hover:cursor-pointer hover:text-gray-100 p-2 pl-4 rounded-md"
@@ -46,7 +67,7 @@ export default function Menu() {
     }
 
     return (
-        <nav className="flex-[1] flex flex-col item-center justify-between bg-gray-600">
+        <nav className="flex-[1] flex flex-col item-center justify-between bg-[#171717] border-t border-gray-700">
             <div className="flex flex-col gap-4 w-full text-gray-300 mt-1">
                 {MENU.map((item, index) => {
                     const isActive = item.href && pathname === item.href
