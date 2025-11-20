@@ -10,6 +10,8 @@ import { useState } from "react";
 interface CreateIdcComponentProps {
     onClose: () => void;
     show: boolean;
+    onNotiy: (type: 'success' | 'error' | 'info', message: string) => void
+    onFetch: () => void
 }
 
 const initalFormData: IdcBaseFields = {
@@ -19,7 +21,7 @@ const initalFormData: IdcBaseFields = {
     contact: '',
 }
 
-export default function CreateIdcComponent({ onClose, show }: CreateIdcComponentProps) {
+export default function CreateIdcComponent({ onClose, show, onNotiy, onFetch }: CreateIdcComponentProps) {
     const [ borderColor, setBorderColor ] = useState<{[key: string]: boolean}>({name: false, location: false})
     const [ formData, setFormData ] = useState<IdcBaseFields>(initalFormData)
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,13 +50,15 @@ export default function CreateIdcComponent({ onClose, show }: CreateIdcComponent
             })
             const data = await res.json();
             if (data?.success) {
-                console.log("创建成功")
+                onFetch();
+                onClose();
+                onNotiy('success', "机房创建成功~")
                 
             } else {
-                console.log("创建失败", data)
+                onNotiy('error', "机房创建失败~")
             }
         } catch (error) {
-            console.log("创建机房信息失败，网络异常~", error)
+            onNotiy('error', "网络异常~")
         }
         
     }

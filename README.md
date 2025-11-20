@@ -73,7 +73,15 @@ model User {
 
 迁移数据（使定义的模型生效）
 ```
-npx prisma migrate dev
+npx prisma migrate dev   
+
+# Prisma Migrate开发环境（dev）中遇到迁移失败会重置数据库（清除所有数据）
+The migration `20251114092311_change_field` failed.
+√ We need to reset the MySQL database "nextapp" at "localhost:3306"
+Do you want to continue? All data will be lost. ... 
+
+
+生产环境必须使用：npx prisma migrate deploy
 ```
 
 ## Todo

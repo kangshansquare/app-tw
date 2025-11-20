@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `OpenVPN` MODIFY `dest_ip` VARCHAR(191) NOT NULL;

@@ -26,7 +26,7 @@ export default function IDC() {
                     </button>
                 </div>
             </div>
-            <Cards />
+            {/* <Cards /> */}
             
 
             <div className="p-5 flex flex-col border border-gray-300 rounded-md shadow-md bg-white">

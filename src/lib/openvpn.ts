@@ -31,6 +31,7 @@ export async function CreateRecord({name, sector, account_ip, apply_date, dest_i
             data: {name, sector, account_ip, apply_date, dest_ip, type, reason, apply_duration, status, description}
         })
     } catch (error) {
+        console.log(error)
         return NextResponse.json({success: false})
     }
 

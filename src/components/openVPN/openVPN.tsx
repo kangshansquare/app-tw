@@ -312,7 +312,7 @@ export default function OpenVPN() {
                                                             <div className='h-10 flex flex-col gap-1 justify-center overflow-hidden' title={record.dest_ip}>
                                                                 
                                                                 { record.dest_ip.split(";").slice(0,1).map((r, index) => (
-                                                                    <span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider truncate'>{r}</span>
+                                                                    <span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider truncate'>{r.length > 50 ? r.slice(0,20) + "..." : r}</span>
                                                                 ))}
                                                                 { record.dest_ip.split(';').length >= 2 && (
                                                                     <span className='text-xs text-blue-400'>+{record.dest_ip.split(';').length - 1}更多</span>
@@ -419,117 +419,6 @@ export default function OpenVPN() {
                 }
             </div>
 
-
-            {/* {
-                recordData ? (
-                    <div className='bg-white rounded-lg shadow-md'>
-                        <div className='overflow-x-auto mb-2 border border-gray-200 overflow-hidden'>
-                            <table className='w-full divide-y divide-gray-50 min-h-[400px]'>
-                                
-                                <thead className='bg-gray-50 border-b border-gray-200'>
-                                    <tr>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请人</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请部门</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>账号/IP</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请日期</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>目的IP-端口</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请类型</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请原因</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>申请时长</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>状态</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>备注</th>
-                                        <th className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>操作</th>
-                                    </tr>
-
-                                </thead>
-                                <tbody className='bg-white divide-y divide-gray-200'>
-                                    {
-                                        recordData.map((record) => (
-                                            <tr key={record.id} className='hover:bg-gray-50 transition-colors'>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.name}</td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.sector}</td>
-                                                <td className='px-5 py-3'>
-                                                    <div className='flex flex-col gap-1'>
-                                                        { record.account_ip.split(";").map((r, index) => (<span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider'>{r}</span>)) }
-                                                    </div>
-                                                </td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{new Date(record.apply_date).toISOString().split('T')[0]}</td>
-                                                <td className='px-5 py-3'>
-                                                    <div className='flex flex-col gap-1'>
-                                                        { record.dest_ip.split(";").map((r, index) => (<span key={r + index} className='text-left text-xs font-medium text-gray-500 tracking-wider'>{r}</span>)) }
-                                                    </div>
-                                                </td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{RuleType_LABEL[record.type as RuleType]}</td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.type === 'close_account' ? "离职" : record.reason}</td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.apply_duration}</td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider'>{record.type === 'close_account' ? "已删除" : record.status }</td>
-                                                <td className='px-5 py-3 text-left text-xs font-medium text-gray-500 tracking-wider max-w-40'>{record.description}</td>
-                                                <td className='px-5 py-3 text-left text-sm font-medium text-gray-500 tracking-wider'>
-                                                    <div className='flex gap-3'>
-                                                        <button title='查看详情' onClick={() => setDetailPortal({show: true, record})}>
-                                                            <EyeFilled className='text-blue-500 hover:text-blue-400 text-base' />
-                                                        </button>
-                                                        <button 
-                                                            title='编辑' disabled={userId === 1 ? false : true} className={`${userId === 1 ? "" : "disabled:cursor-not-allowed"}`}
-                                                            onClick={() => setEditPortal({ show: true, record })}
-                                                        >
-                                                            <EditFilled className='text-yellow-500 hover:text-yellow-400 text-base' />
-                                                        </button>
-                                                        <button 
-                                                            title='删除' 
-                                                            disabled={userId === 1 ? false : true} className={`${userId === 1 ? "" : "disabled:cursor-not-allowed"}`}
-                                                            onClick={() => setDeletePortal({ show: true, record })}
-                                                        >
-                                                            <DeleteFilled className='text-red-500 hover:text-red-400 text-base' />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    }
-                                    
-                                </tbody>
-                            </table>
-                        </div>
-
-                        
-                        {
-                            DetailPortal.show && 
-                            <DetailRecord  show={DetailPortal.show} onClose={() => setDetailPortal(prev => ({...prev, show: false}))} record={DetailPortal.record} />
-                        }
-                        
-                        {
-                            DeletePortal.show && 
-                            <DeleteRecord 
-                                show={DeletePortal.show} 
-                                onClose={() => setDeletePortal(prev => ({...prev, show: false}))} 
-                                record={DeletePortal.record}
-                                onNotify={onNotify}
-                                fetchRecords={fetchRecords}
-                                
-                            />
-                        }
-
-                        {
-                            EditPortal.show && 
-                            <EditRecord 
-                                show={EditPortal.show} 
-                                onClose={() => setEditPortal(prev => ({...prev, show: false}))} 
-                                onNotify={onNotify}  
-                                fetchRecords={fetchRecords} 
-                                record={EditPortal.record} 
-                            />
-                        }
-
-                        <Pagination page={page} totalCount={totalCount} totalPage={totalPage} onChangePage={onChangePage} />
-
-                    </div>
-                ) : (
-                    <div className='flex items-center justify-center mt-5'>
-                        <span className='font-light text-gray-500'>暂无记录</span>
-                    </div>
-                )
-            } */}
 
 
             {/* 提示 */}

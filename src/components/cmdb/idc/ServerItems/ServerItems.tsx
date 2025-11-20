@@ -8,8 +8,8 @@ export default function ServerItems() {
     const onChangePage = (page: number) => {}
 
     return (
-        <div className="border border-gray-100 shadow-md">
-            <div className="">
+        <div className="border border-gray-100 shadow-md h-[600px]">
+            <div className="h-[520px]">
                 <table className='w-full divide-y divide-gray-50'>
                     <thead className='bg-white border-b border-gray-200 sticky top-0 z-10'>
                         <tr>
@@ -201,15 +201,13 @@ export default function ServerItems() {
                 </table>
             </div>
 
-            <div className='bg-white border-t border-gray-100 rounded-bl-lg rounded-br-lg'>
-                <Pagination
-                    page={1}
-                    totalPage={5}
-                    totalCount={10}
-                    onChangePage={() =>onChangePage(1)}
-                    isLoading={false}
-                />
-            </div>
+            <Pagination
+                page={1}
+                totalPage={5}
+                totalCount={10}
+                onChangePage={() =>onChangePage(1)}
+                isLoading={false}
+            />
         </div>
     )
 }

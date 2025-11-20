@@ -1,12 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse, NextRequest } from "next/server";
-import { CabinetSchema } from '@/lib/schemas/Schema';
-import { ZodError } from "zod";
-
+import { ServiceLineSchema } from '@/lib/schemas/Schema';
+import { success, ZodError } from 'zod';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    console.log(searchParams)
     const page = Math.max(Number(searchParams.get('page') || 1), 1)
     const pageSize = Math.max(Number(searchParams.get('pageSize') || 5), 1)
     const skip = (page - 1) * pageSize
@@ -19,21 +17,14 @@ export async function GET(req: NextRequest) {
                 name: { 
                     contains: q as string,
                 }
-            },
-            { 
-                idc: { 
-                    name: { 
-                        contains: q as string,
-                    } 
-                } 
             }
         ]
     } : {}
 
     try {
         const [ totalCount, items ] = await Promise.all([
-            prisma.cabinet.count({ where: whereFilter }),
-            prisma.cabinet.findMany({
+            prisma.serviceLine.count({ where: whereFilter }),
+            prisma.serviceLine.findMany({
                 where: whereFilter,
                 skip,
                 take: pageSize,
@@ -42,40 +33,38 @@ export async function GET(req: NextRequest) {
                 }
             })
         ])
-
-        console.log(items)
-
+        
         return NextResponse.json({
             success: true,
-            cabinets: items,
             totalCount,
+            items,
             pagination: {
                 page,
                 totalPage: Math.ceil(totalCount / pageSize)
             }
         })
 
-    } catch(error) {
-        console.log(error)
+    } catch (error) {
         return NextResponse.json({ success: false, message: '服务器错误' })
     }
 }
 
 export async function POST(req: NextRequest) {
+    
     try {
-        const data =  await req.json()
-        const { cabinetData } = data
-        const parased = CabinetSchema.parse(cabinetData)
-        await prisma.cabinet.create({
-            data: parased
+        const body = await req.json()
+        const parsed = ServiceLineSchema.parse(body)
+        await prisma.serviceLine.create({
+            data: parsed
         })
 
-        return NextResponse.json({success: true})
+        return NextResponse.json({ success: true, message: '创建成功' })
     } catch(error) {
+        console.log(error)
         if (error instanceof ZodError) {
-            console.log(error)
-            return NextResponse.json({ success: false, message: '数据格式不正确' })
+            return NextResponse.json({ success: false, message: '数据格式错误' })
         }
+
         return NextResponse.json({ success: false, message: '服务器错误' })
     }
 }

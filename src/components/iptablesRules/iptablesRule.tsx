@@ -23,16 +23,22 @@ export default function IptablesRule() {
     
     const timers = useRef<{ [key: string]: NodeJS.Timeout | null }>({})
 
+
     const [textareas, setTextareas] = useState<{ [key: string]: Array<string> }>({});
 
-    const handleInputChange = (key: string) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const value = event.target.value;
-        if (timers.current[key]) {
-            clearTimeout(timers.current[key])
-        }
-        timers.current[key] = setTimeout(() => {
-            setInputs(prev => ({ ...prev, [key]: value }))
-        },300)
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>)  => {
+        const { name, value } = e.target;
+        console.log(name, value)
+        setInputs(prev => ({ ...prev, [name]: value }))
+        
+        // const value = event.target.value;
+        // if (timers.current[key]) {
+        //     clearTimeout(timers.current[key])
+        // }
+        // timers.current[key] = setTimeout(() => {
+        //     setInputs(prev => ({ ...prev, [key]: value }))
+        //     // setInputs(prev => ({ ...prev, [key]: key === 'date' ? (value ? new Date(value) : null) : value }))
+        // },300)
     }
 
     // 组件卸载时清理所有定时器，防止内存泄露
@@ -44,8 +50,8 @@ export default function IptablesRule() {
     
     const handleButtonClick = () => {
 
-        const vpnIp = inputs['vpnIp'];
-        const target_ip_port = inputs['target_ip_port']
+        const vpnIp = inputs['account_ip'];
+        const target_ip_port = inputs['dest_ip']
 
         const rules_11: string[] = [];
         const rules_17: string[] = [];
@@ -54,8 +60,12 @@ export default function IptablesRule() {
         // const ips = vpnIp.includes(',') ? vpnIp.split(',').map(ip => ip.trim()).filter(Boolean) : vpnIp
         // const ip_ports = target_ip_port.includes('\n') ? target_ip_port.split('\n').map(t => t.trim()).filter(Boolean) : target_ip_port
 
-        const ips = vpnIp ? vpnIp.split(',').map(ip => ip.trim()).filter(Boolean) : [];
+        // const ips = vpnIp ? vpnIp.split(',').map(ip => ip.trim()).filter(Boolean) : [];
+        const ips = vpnIp ? vpnIp.split(';').map(part => part.split(',')[1]).filter(ip => ip) : []
+        console.log(ips)
+        
         const ip_ports = target_ip_port ? target_ip_port.split('\n').map(t => t.trim()).filter(Boolean) : [];
+        console.log(ip_ports)
         
         // const ipRegex = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
         // 示例用法
@@ -155,6 +165,45 @@ export default function IptablesRule() {
         
     }
 
+    const handleAsync = async () => {
+        console.log(inputs)
+        const record = {
+            name: '',
+            sector: "",
+            account_ip: "",
+            apply_date: new Date(),
+            dest_ip: "",
+            type: "open_rule",
+            reason: "工作需要",
+            apply_duration: "永久",
+            status: "opened",
+            description: ""
+        }
+
+        const resData = {...record, ...inputs}
+        
+        try {
+            const res = await fetch("/api/record", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(resData)
+            })
+            const data = await res.json();
+            if(data?.success) {
+                
+                console.log('同步成功')
+                
+            } else {
+                console.log("error", "创建失败，请重试！")
+            }
+
+        } catch (error) {
+            console.log("error", "网络错误")
+        }
+    }
+
     return (
         <div className="flex flex-col gap-2 w-full border-gray-300 border-2 rounded-lg p-4">
             <div className="flex justify-between">
@@ -166,8 +215,49 @@ export default function IptablesRule() {
                     生成规则
                 </button>
             </div>
-            <div className="flex flex-col p-1 gap-4"> 
+
+            <div className="p-1 grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="flex flex-col gap-2">
+                    <label>vpn账号/IP:</label>
+                    <input 
+                        type="text" 
+                        name="account_ip"
+                        placeholder="vpn 账号/IP，多个账号以分号分割" 
+                        className="outline-none p-2 border border-gray-200 rounded-md"
+                        onChange={handleInputChange}
+                    />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <label>申请人</label>
+                    <input 
+                        className="outline-none p-2 border border-gray-200 rounded-md" 
+                        name="name"
+                        onChange={handleInputChange}
+                    />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <label>部门</label>
+                    <input 
+                        className="outline-none p-2 border border-gray-200 rounded-md" 
+                        name="sector"
+                        onChange={handleInputChange}
+                    />
+                </div>
+                {/* <div className="flex flex-col gap-2">
+                    <label>申请时间</label>
+                    <input 
+                        type="date"
+                        name="date"
+                        className="outline-none p-2 border border-gray-200 rounded-md"
+                        // value={new Date().toISOString().split('T')[0]}
+                        value={inputs['date'] || ""}
+                        onChange={handleInputChange}
+                    />
+                </div> */}
+            </div>
+
+            <div className="flex flex-col p-1 gap-4"> 
+                {/* <div className="flex flex-col gap-2">
                     <label>vpn ip:</label>
                     <input 
                         type="text" 
@@ -175,14 +265,15 @@ export default function IptablesRule() {
                         className="p-1 w-1/3 rounded outline-none border-gray-300 border"
                         onChange={handleInputChange('vpnIp')}
                     />
-                </div>
+                </div> */}
                 <div className="flex flex-col gap-2">
                     <label>目标IP和端口:</label>
                     {/* <input type="text" placeholder="一行一个. eg. 1.1.1.1/32 80,443,8080:8085" className="p-1 w-1/3 outline-none border-gray-300 border" /> */}
                     <textarea 
                         placeholder="一行一个. eg. 1.1.1.1/32 80,443,8080:8085" 
                         className="w-1/3 outline-none border-2 rounded-md p-1"
-                        onChange={handleInputChange('target_ip_port')}
+                        name="dest_ip"
+                        onChange={handleInputChange}
                     />
                 </div>
                 <div className="flex flex-col gap-2">
@@ -219,7 +310,10 @@ export default function IptablesRule() {
                             复制
                         </button>
                     </div>
-                    <textarea className="w-[80%] outline-none border-2 rounded-md p-1" defaultValue={textareas["rule_19"] ? textareas["rule_19"].join('\n') : ""} />
+                    <div className="flex items-end justify-between">
+                        <textarea className="w-[80%] outline-none border-2 rounded-md p-1" defaultValue={textareas["rule_19"] ? textareas["rule_19"].join('\n') : ""} />
+                        <button className="p-2 px-4 bg-blue-600 rounded-md text-white" onClick={handleAsync}>同步记录</button>
+                    </div>
                 </div>
             </div>
         </div>

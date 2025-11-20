@@ -100,6 +100,7 @@ model Idc {
   create_time DateTime     @default(now())
   cabinets    Cabinet[]
   middleware  Middleware[]
+  Server      Server[]
 }
 
 model Cabinet {
@@ -108,10 +109,11 @@ model Cabinet {
   idcId       Int
   idc         Idc      @relation(fields: [idcId], references: [id])
   uCount      Int?
-  powerKw     Float?
+  powerKw     String?
   status      String   @default("active")
   remake      String?
   create_time DateTime @default(now())
+  Server      Server[]
 
   @@unique([idcId, name])
 }
@@ -121,7 +123,7 @@ model ServiceLine {
   name        String   @unique
   owner       String?
   email       String?
-  status      String
+  status      String   @default("active")
   create_time DateTime @default(now())
 }
 
@@ -133,4 +135,28 @@ model Logs {
   ip          String?
   content     String
   status      String
+}
+
+model Server {
+  id            Int       @id @default(autoincrement())
+  type          String
+  hostname      String
+  os            String
+  kernelVersion String
+  cpuModel      String
+  cpuCores      Int
+  memoryGB      Int
+  diskTotal     String
+  privateIp     String
+  publicIp      String
+  macAddress    String
+  serialNumber  String
+  vendor        String
+  idcId         Int
+  idc           Idc       @relation(fields: [idcId], references: [id])
+  cabinetId     Int
+  cabinet       Cabinet   @relation(fields: [cabinetId], references: [id])
+  createAt      DateTime  @default(now())
+  updateAt      DateTime  @updatedAt
+  lastSyncAt    DateTime?
 }
