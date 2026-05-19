@@ -4,18 +4,15 @@ import { NextResponse, NextRequest } from 'next/server';
 export function middleware(request: NextRequest, response: NextResponse) {
     const token = request.headers.get('cookie')?.replace('token=', '');
     const { pathname } = request.nextUrl;
-
-    console.log("Token: ", token)
-
-    console.log(pathname)
+    
 
     if (pathname === '/login') {
         // 如果是登录或注册，不需要验证token
         return NextResponse.next();
     }
 
-    // 对api接口鉴权: 认证接口免鉴权
-    const publicApiPaths = ['/api/auth', '/api/check-auth'];
+    // 对api接口鉴权: 认证接口免鉴权;cmdb注册、数据上报免鉴权
+    const publicApiPaths = ['/api/auth', '/api/check-auth', '/api/agent/register', '/api/agent/report', '/api/system-manage/authorized-manage', '/api/test'];
     if (pathname.startsWith('/api') && publicApiPaths.some(path => pathname.startsWith(path))) {
         return NextResponse.next();
     }

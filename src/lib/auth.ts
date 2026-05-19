@@ -1,5 +1,5 @@
 import { cookies, headers } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import jwt from 'jsonwebtoken';
 
 
@@ -32,3 +32,31 @@ export function getUserIdFromToken(): number | null {
     }
 }
 
+
+export function getTokeFromRequest(req: NextRequest): string | null {
+    const cookie = req.headers.get('cookie');
+    
+    const token = cookie?.split(';').find(c => c.trim().startsWith('token='))?.split('=')[1];
+    const auth = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+
+    
+    return token || auth || null
+}
+
+export function parseToken(token: string): { username: string, userId: number } | null {
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY!) as { username: string, userId: number };
+        return { username: decoded.username, userId: decoded.userId }
+    } catch(error) {
+        return null
+    }
+}
+
+export function getClientIp(req: NextRequest): string | undefined {
+    
+    return (
+        req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+        req.headers.get('x-real-ip') ||
+        undefined
+    )
+}

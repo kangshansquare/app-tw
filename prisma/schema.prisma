@@ -24,6 +24,8 @@ model User {
   middleware   Middleware[]
   create_time  DateTime     @default(now())
   groups       UserGroup[]
+  permVersion  Int          @default(1)
+  roles        User_Role[]
 }
 
 model Tips {
@@ -144,19 +146,130 @@ model Server {
   os            String
   kernelVersion String
   cpuModel      String
-  cpuCores      Int
-  memoryGB      Int
+  cpuCores      String
+  memoryGB      String
   diskTotal     String
   privateIp     String
-  publicIp      String
+  publicIp      String?
   macAddress    String
-  serialNumber  String
-  vendor        String
+  serialNumber  String    @unique
+  vendor        String?
   idcId         Int
   idc           Idc       @relation(fields: [idcId], references: [id])
   cabinetId     Int
   cabinet       Cabinet   @relation(fields: [cabinetId], references: [id])
+  kvms          Int?
   createAt      DateTime  @default(now())
   updateAt      DateTime  @updatedAt
   lastSyncAt    DateTime?
+}
+
+enum StatusLABEL {
+  active
+  deprecated
+  hidden
+}
+
+model IpRecord {
+  id          Int      @id @default(autoincrement())
+  ip          String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model CloudProvider {
+  id       Int    @id @default(autoincrement())
+  provider String
+  name     String
+
+  regions  CloudRegion[]
+  accounts CloudAccount[]
+}
+
+model CloudAccount {
+  id                Int           @id @default(autoincrement())
+  provider          CloudProvider @relation(fields: [providerId], references: [id])
+  providerId        Int
+  name              String
+  environment       String
+  access_key_id     String?
+  secret_access_key String?
+
+  createAt  DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model CloudRegion {
+  id         Int           @id @default(autoincrement())
+  provider   CloudProvider @relation(fields: [providerId], references: [id])
+  providerId Int
+  regionId   String
+  name_en    String
+  name_zh    String
+  status     StatusLABEL   @default(active)
+
+  @@unique([providerId, regionId])
+}
+
+model Role {
+  id       Int     @id @default(autoincrement())
+  code     String  @unique // 业务唯一码，如 'ADMIN'
+  name     String
+  version  Int     @default(0) // 乐观锁版本号
+  isSystem Boolean @default(false) // 是否系统内置角色，防止误删
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  description String?
+
+  // 关系
+  permissions Role_Permission[]
+  users       User_Role[]
+
+  @@index([code])
+}
+
+model Permission {
+  id     Int    @id @default(autoincrement())
+  name   String @default("")
+  code   String @unique // 业务唯一码，如 'user:read'
+  module String // 模块名，如 'user', 'order'
+  action String // 动作名，如 'read', 'write', 'delete'
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  description String?
+
+  // 关系
+  roles Role_Permission[]
+
+  @@unique([module, action]) // 确保同一模块下的动作不重复
+}
+
+model Role_Permission {
+  id           Int @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  // 唯一索引：防止同一个角色重复分配同一个权限
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model User_Role {
+  id     Int @id @default(autoincrement())
+  userId Int
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  // 唯一索引：防止同一个用户重复分配同一个角色
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
 }

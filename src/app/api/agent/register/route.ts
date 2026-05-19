@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     // Agent端更新请求携带API Key
     // 生成唯一标识AgentId：物理机 server-sn号；虚拟机 kvm-uuid；云主机 实例id 
 
-    console.log(req.headers)
+    console.log(req.headers.get('x-api-key'))
 
 
     

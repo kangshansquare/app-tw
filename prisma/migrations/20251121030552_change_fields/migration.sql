@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Server` MODIFY `cpuCores` VARCHAR(191) NOT NULL,
+    MODIFY `memoryGB` VARCHAR(191) NOT NULL;

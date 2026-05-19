@@ -301,7 +301,7 @@ const data = await prispma.database.findMany({
 ```
 - [ ] React useCallback、useMemo、Context、自定义hook
 - [ ] AbortController、AbortSignal
-- [ ] 后端zod校验
+- [x] 后端zod校验
 - [ ] prisma查询优化
 ```
 const grouped = await prisma.tips.groupBy({
@@ -325,7 +325,7 @@ const grouped = await prisma.tips.groupBy({
 2.题库录入：逐条录入、批量录入
 - 科目名称、题型、答案、（分值）
 ```
-- [ ] 工具"iptables规则生成"，添加申请人、部门、账号/vpn_ip和同步记录按钮，点击按钮添加记录。
+- [x] 工具"iptables规则生成"，添加申请人、部门、账号/vpn_ip和同步记录按钮，点击按钮添加记录。
 - [ ] 图表组件改成独立组件，通过props传递需要的数据
 ```
 需要图表展示的组件：ServerDashboard - 用于展示服务器信息；MiddleDashboard - 用于展示中间件信息
@@ -333,4 +333,18 @@ const grouped = await prisma.tips.groupBy({
     1.新增机房/云平台数据表 
     2.页面添加系统配置路由，后台添加机房信息；前端调用api接口获取机房信息 （只有管理员admin账号显示该路由） 
     3.更改服务器数据表和中间件数据表，添加与机房数据表内联
+```
+- [ ] cmdb
+```
+云平台管理：
+- 前端nextjs：平台类型（aliyun、aws等）、平台环境（生产/测试/开发环境）管理；凭证管理（添加/修改/删除，必须加密再写入数据库，加密key通过环境变量、.env文件(不可上传到git)获取）；前端不直接使用凭证获取/修改云资环；获取/修改云资源通过Python
+- 后端Python FastAPI：不暴露公网；使用凭证获取/修改云资源，部署在内网，凭证从数据库中获取，解密key通过环境变量、.env（不可上传git）获取
+- nextjs 与 python ：通信，部署在同一个内网；认证，携带X-API-KEY（环境变量或.env文件）；
+
+- 区分云环境：每个凭证（或云账号）、云资源都带有云环境字段（数据库），反查要操作的资源属于何种云环境
+
+- 权限校验：如开发账号不能操作线上环境等
+
+注意事项：
+1.如果prisma中定义了数据表，在fastapi中用到的表，需要定义对应model，且字段定义要一致（使用SQLAlchemy/pymysql等ORM；用原生sql则不需要定义model）
 ```

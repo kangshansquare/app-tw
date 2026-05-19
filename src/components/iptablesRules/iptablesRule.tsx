@@ -15,9 +15,12 @@ interface Textareas {
     rule_19: string[];
 }
 
+interface IptablesRuleProps {
+    onNotify: (type: 'success' | 'error' | 'info', message: string) => void
+}
 
 
-export default function IptablesRule() {
+export default function IptablesRule({ onNotify }: IptablesRuleProps) {
 
     const [inputs, setInputs] = useState<{ [key: string]: string }>({});
     
@@ -166,7 +169,7 @@ export default function IptablesRule() {
     }
 
     const handleAsync = async () => {
-        console.log(inputs)
+        
         const record = {
             name: '',
             sector: "",
@@ -193,14 +196,14 @@ export default function IptablesRule() {
             const data = await res.json();
             if(data?.success) {
                 
-                console.log('同步成功')
+                onNotify('success','记录同步成功')
                 
             } else {
-                console.log("error", "创建失败，请重试！")
+                onNotify("error", "记录同步失败")
             }
 
         } catch (error) {
-            console.log("error", "网络错误")
+            onNotify("error", "网络错误")
         }
     }
 

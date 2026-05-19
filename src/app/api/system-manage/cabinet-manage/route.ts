@@ -6,7 +6,28 @@ import { ZodError } from "zod";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    console.log(searchParams)
+
+    if (searchParams.get('fields') !== null) {
+        try {
+            const cabinets  = await prisma.cabinet.findMany({
+                select: {
+                    id: true,
+                    name: true,
+                    idcId: true
+                }
+            })
+            return NextResponse.json({
+                success: true,
+                cabinets
+            })
+        } catch(error) {
+            return NextResponse.json({
+                success: false,
+                message: '服务器错误'
+            })
+        }
+    }
+
     const page = Math.max(Number(searchParams.get('page') || 1), 1)
     const pageSize = Math.max(Number(searchParams.get('pageSize') || 5), 1)
     const skip = (page - 1) * pageSize

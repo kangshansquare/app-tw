@@ -15,8 +15,6 @@ interface NotificationProps {
 
 export default function Notification({ show,closeNotification, duration = 2000, type, message }: NotificationProps) {
 
-    if (!show)  return;
-
     useEffect(() => {
         if (show && closeNotification) {
             const timer = setTimeout(() => {
@@ -28,7 +26,7 @@ export default function Notification({ show,closeNotification, duration = 2000, 
     }, [show, duration, closeNotification])
 
 
-
+    if (!show)  return;
     return (
         ReactDOM.createPortal(
             <div className={`fixed bottom-8 right-8 z-[9999] bg-black/80 rounded-lg p-3 ${ show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20" } transform  transition-all duration-300`}>

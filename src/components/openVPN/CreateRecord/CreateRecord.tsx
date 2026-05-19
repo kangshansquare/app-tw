@@ -1,9 +1,9 @@
 'use client';
 
 import ReactDOM from 'react-dom';
-import { CloseOutlined, setTwoToneColor } from '@ant-design/icons'
+import { CloseOutlined } from '@ant-design/icons'
 import type { OpenVPNRecordType } from '@/types/record';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface CreateRecordProps {
     show: boolean;

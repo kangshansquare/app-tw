@@ -5,9 +5,6 @@ import { getDateRange } from "@/utils/dateRange";
 
 
 export async function GET(request: NextRequest) {
-    
-    // console.log("API GET /api/record: ", request)
-    // return GetAll();
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(Number(searchParams.get("page")) || 1, 1)
@@ -113,7 +110,6 @@ export async function GET(request: NextRequest) {
             return Math.round(((current - previous) / previous) * 100);
         }
 
-        console.log("加搜索后：", items)
 
         return NextResponse.json({
             success: true,
@@ -145,36 +141,6 @@ export async function GET(request: NextRequest) {
     }
 
 
-
-    // try {
-    //     const items = await prisma.openVPN.findMany({
-    //         skip,
-    //         take: pageSize,
-    //         orderBy: {
-    //             apply_date: 'desc'
-    //         }
-    //     });
-
-    //     // 共有多少条数据
-    //     const totalCount = await prisma.openVPN.count();
-
-    //     return NextResponse.json({
-    //         success: true,
-    //         records: items,
-    //         pagination: {
-    //             page,
-    //             pageSize,
-    //             totalCount,
-    //             totalPage: Math.ceil(totalCount / pageSize)
-    //         }
-    //     })
-
-    // } catch (error) {
-    //     return NextResponse.json({ success: false })
-    // }
-
-
-    // return NextResponse.json({ success: true, record: null })
 }
 
 
@@ -184,7 +150,6 @@ export async function POST(request: NextRequest) {
 
     console.log("-------------API POST /api/record: ", body)
 
-    // return NextResponse.json({ success: true, message: "test" })
     
     return CreateRecord(body)
 }

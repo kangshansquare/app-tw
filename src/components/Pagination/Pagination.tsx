@@ -1,7 +1,7 @@
 'use client';
 
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
-// import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+
  
 interface PaginationProps {
     page: number

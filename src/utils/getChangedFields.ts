@@ -1,6 +1,6 @@
 export function getChangedFields<T extends object>(
     original: T,
-    updated: T,
+    updated: Partial<T>,
     alwaysInclude: (keyof T)[] = []
 ): Partial<T> {
     const changed: Partial<T> = {};
